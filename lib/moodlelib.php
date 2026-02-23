@@ -5612,7 +5612,7 @@ function email_to_user($user, $from, $subject, $messagetext, $messagehtml = '', 
     } catch (\Exception $e) {
         debugging('Failed to log email to mail_history: ' . $e->getMessage(), DEBUG_DEVELOPER);
     }
-    return true;
+
     if (empty($user) or empty($user->id)) {
         debugging('Can not send email to null user', DEBUG_DEVELOPER);
         return false;
