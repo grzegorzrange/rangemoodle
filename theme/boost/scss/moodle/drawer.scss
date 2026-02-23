@@ -2,7 +2,7 @@
 $fixed-header-y: $navbar-height;
 
 $drawer-width: 285px !default;
-$drawer-left-width: 285px !default;
+$drawer-left-width: 32px !default;
 $drawer-right-width: 315px !default;
 $drawer-padding-x: 20px !default;
 $drawer-padding-y: 20px !default;
@@ -309,4 +309,9 @@ $right-drawer-width: 320px;
     }
 
     @include thin-scrolls($drawer-scroll-bg-track);
+}
+
+// Hide right drawer everywhere except /mod/quiz/ pages.
+body:not(.path-mod-quiz) .drawer-right {
+    display: none !important;
 }

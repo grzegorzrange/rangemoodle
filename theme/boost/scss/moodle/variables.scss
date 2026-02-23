@@ -22,7 +22,7 @@ $state-danger-border: shift-color($danger, -70%) !default;
 $primary-nav-padding-y: ($spacer * 0.25) !default;
 $primary-nav-padding-x: ($spacer * 0.5) !default;
 
-$navbar-height: 60px !default;
+$navbar-height: 70px !default;
 $stickyfooter-height: calc(max(80px, calc(#{$font-size-base} * 3))) !default;
 $course-content-maxwidth: 830px !default;
 $h5p-content-maxwidth: 960px !default;
@@ -30,7 +30,7 @@ $h5p-content-maxwidth: 960px !default;
 $box-shadow-drawer-left: -0.25rem .25rem .8rem rgba($black, .025) !default;
 $box-shadow-drawer-right: 0 .25rem .8rem rgba($black, .025) !default;
 
-$moremenu-height: 60px !default;
+$moremenu-height: 70px !default;
 
 $btn-icon-border-radius: $btn-border-radius !default;
 

@@ -1,0 +1,37 @@
+{{!
+    @template local_activityreport/filter_form
+
+    Filter form for activity report.
+
+    Context variables required for this template:
+    * actionurl - Form action URL
+    * reseturl - Reset filters URL
+    * fields - Array of filter field objects with id, name, label, type, value
+    * str_filter - Filter button label
+    * str_reset - Reset button label
+
+    Example context (json):
+    {
+        "actionurl": "/local/activityreport/index.php",
+        "reseturl": "/local/activityreport/index.php",
+        "fields": [
+            {"id": "filter_firstname", "name": "filter_firstname", "label": "First name", "type": "text", "value": ""}
+        ],
+        "str_filter": "Filter",
+        "str_reset": "Reset filters"
+    }
+}}
+<form method="get" action="{{{actionurl}}}" class="mb-3">
+    <div class="d-flex flex-wrap align-items-end gap-2">
+        {{#fields}}
+        <div class="form-group">
+            <label for="{{id}}">{{label}}</label>
+            <input type="{{type}}" id="{{id}}" name="{{name}}" class="form-control" value="{{value}}">
+        </div>
+        {{/fields}}
+        <div class="form-group">
+            <button type="submit" class="btn btn-primary">{{str_filter}}</button>
+            <a href="{{{reseturl}}}" class="btn btn-secondary">{{str_reset}}</a>
+        </div>
+    </div>
+</form>

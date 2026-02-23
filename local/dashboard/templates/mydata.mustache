@@ -1,0 +1,109 @@
+{{!
+    @template local_dashboard/mydata
+
+    User data display with icon tiles.
+
+    Context variables required for this template:
+    * firstname - User first name
+    * lastname - User last name
+    * email - User email
+    * phone - User phone
+    * pesel - User PESEL (username)
+    * editurl - URL to edit data
+    * str_firstname - Label
+    * str_lastname - Label
+    * str_email - Label
+    * str_phone - Label
+    * str_pesel - Label
+    * str_edit - Edit button label
+
+    Example context (json):
+    {
+        "firstname": "Jan",
+        "lastname": "Kowalski",
+        "email": "jan@example.com",
+        "phone": "123456789",
+        "pesel": "90010112345",
+        "editurl": "/local/dashboard/mydata_edit.php",
+        "str_firstname": "First name",
+        "str_lastname": "Last name",
+        "str_email": "Email",
+        "str_phone": "Phone",
+        "str_pesel": "PESEL",
+        "str_edit": "Edit my data"
+    }
+}}
+<div class="mydata-profile">
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body d-flex align-items-center">
+                    <div class="mydata-icon-wrapper me-3">
+                        <i class="fa fa-user fa-lg"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small">{{str_firstname}}</div>
+                        <div class="fw-bold fs-5">{{firstname}}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body d-flex align-items-center">
+                    <div class="mydata-icon-wrapper me-3">
+                        <i class="fa fa-user-tag fa-lg"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small">{{str_lastname}}</div>
+                        <div class="fw-bold fs-5">{{lastname}}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body d-flex align-items-center">
+                    <div class="mydata-icon-wrapper me-3">
+                        <i class="fa fa-envelope fa-lg"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small">{{str_email}}</div>
+                        <div class="fw-bold fs-5">{{email}}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body d-flex align-items-center">
+                    <div class="mydata-icon-wrapper me-3">
+                        <i class="fa fa-phone fa-lg"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small">{{str_phone}}</div>
+                        <div class="fw-bold fs-5">{{phone}}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body d-flex align-items-center">
+                    <div class="mydata-icon-wrapper me-3">
+                        <i class="fa fa-id-card fa-lg"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small">{{str_pesel}}</div>
+                        <div class="fw-bold fs-5">{{pesel}}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="text-center">
+        <a href="{{{editurl}}}" class="btn btn-primary">
+            <i class="fa fa-pencil me-1"></i>{{str_edit}}
+        </a>
+    </div>
+</div>

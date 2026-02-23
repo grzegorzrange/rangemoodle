@@ -24,7 +24,14 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$bodyattributes = $OUTPUT->body_attributes([]);
+$extraclasses = [];
+if(is_siteadmin()){
+    $extraclasses[] = 'admin-view';
+}else{
+    $extraclasses[] = 'user-view';
+}
+
+$bodyattributes = $OUTPUT->body_attributes($extraclasses);
 $templatecontext = [
     'sitename' => format_string($SITE->shortname, true, ['context' => context_course::instance(SITEID), "escape" => false]),
     'output' => $OUTPUT,

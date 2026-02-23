@@ -1376,7 +1376,7 @@ function badges_send_verification_email($email, $backpackid, $backpackpassword) 
     $link = $verificationpath . '?data='. $secret;
     // Hard-coded button styles, because CSS can't be used in emails.
     $buttonstyles = [
-        'background-color: #0f6cbf',
+        'background-color: #e63612',
         'border: none',
         'color: white',
         'padding: 12px',

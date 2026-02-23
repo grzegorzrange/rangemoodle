@@ -1,0 +1,29 @@
+.que.filepicker textarea.qtype_filepicker_response {
+    width: 100%;
+}
+
+.que.filepicker textarea.qtype_filepicker_response.qtype_filepicker_plain {
+    white-space: pre-wrap;
+    font: inherit;
+}
+
+.que.filepicker textarea.qtype_filepicker_response.qtype_filepicker_monospaced {
+    white-space: pre;
+    font-family: Andale Mono, Monaco, Courier New, DejaVu Sans Mono, monospace;
+}
+
+.que.filepicker .qtype_filepicker_response {
+    min-height: 3em;
+}
+
+.que.filepicker .qtype_filepicker_response.readonly {
+    background-color: white;
+}
+
+.que.filepicker div.qtype_filepicker_response textarea {
+    width: 100%;
+}
+
+.que.filepicker .ablock .filemanager .fp-restrictions {
+    margin-top: 1em;
+}

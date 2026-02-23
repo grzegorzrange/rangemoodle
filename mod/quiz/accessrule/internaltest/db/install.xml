@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="mod/quiz/accessrule/internaltest/db" VERSION="2026021801"
+    COMMENT="XMLDB file for quizaccess_internaltest">
+  <TABLES>
+    <TABLE NAME="quizaccess_internaltest" COMMENT="Stores internal test setting per quiz">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="quizid" TYPE="int" LENGTH="10" NOTNULL="true" COMMENT="FK to quiz.id"/>
+        <FIELD NAME="internaltest" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="quizid" TYPE="unique" FIELDS="quizid"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="quizaccess_inttest_notif" COMMENT="Tracks sent notifications to avoid duplicates">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="quizid" TYPE="int" LENGTH="10" NOTNULL="true" COMMENT="FK to quiz.id"/>
+        <FIELD NAME="notiftype" TYPE="char" LENGTH="20" NOTNULL="true" COMMENT="7days_before, on_open, 24h_before_close"/>
+        <FIELD NAME="timesent" TYPE="int" LENGTH="10" NOTNULL="true"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="quizid_type" TYPE="unique" FIELDS="quizid, notiftype"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="quizaccess_inttest_results" COMMENT="Stores JSON results from internal test submissions">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="quizid" TYPE="int" LENGTH="10" NOTNULL="true" COMMENT="FK to quiz.id"/>
+        <FIELD NAME="attemptid" TYPE="int" LENGTH="10" NOTNULL="true" COMMENT="FK to quiz_attempts.id"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" COMMENT="FK to user.id"/>
+        <FIELD NAME="jsondata" TYPE="text" NOTNULL="true" COMMENT="Summary JSON sent to API (no per-question data)"/>
+        <FIELD NAME="questionsdata" TYPE="text" NOTNULL="false" COMMENT="Per-question details JSON (stored only, not sent to API)"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="sent" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" COMMENT="0=not sent, 1=sent to API"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="attemptid" TYPE="unique" FIELDS="attemptid"/>
+      </KEYS>
+    </TABLE>
+  </TABLES>
+</XMLDB>

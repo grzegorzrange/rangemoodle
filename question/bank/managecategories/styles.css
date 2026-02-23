@@ -51,7 +51,7 @@
 }
 .qbank_managecategories-item.draghandle > .container:hover {
     cursor: move;
-    border-color: #0f6cbf;
+    border-color: #e63612;
     box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
 }
 /* No move/delete buttons on non-draggable items */

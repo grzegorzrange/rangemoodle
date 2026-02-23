@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="local/support/db" VERSION="2026021300" COMMENT="XMLDB file for local_support plugin."
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
+>
+  <TABLES>
+    <TABLE NAME="local_mail_history" COMMENT="Logs every successfully sent email.">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" COMMENT="Recipient user ID."/>
+        <FIELD NAME="email" TYPE="char" LENGTH="255" NOTNULL="false" COMMENT="Recipient email address."/>
+        <FIELD NAME="subject" TYPE="char" LENGTH="255" NOTNULL="true" COMMENT="Email subject."/>
+        <FIELD NAME="message" TYPE="text" NOTNULL="true" COMMENT="Email body (HTML or plain text)."/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" COMMENT="Timestamp when the email was sent."/>
+        <FIELD NAME="usercreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" COMMENT="User who triggered the email (0 if system)."/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="userid_fk" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="local_sms_history" COMMENT="Logs every SMS send attempt.">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" COMMENT="Recipient user ID."/>
+        <FIELD NAME="phone" TYPE="char" LENGTH="20" NOTNULL="true" COMMENT="Phone number used."/>
+        <FIELD NAME="message" TYPE="text" NOTNULL="true" COMMENT="SMS message content."/>
+        <FIELD NAME="component" TYPE="char" LENGTH="100" NOTNULL="true" DEFAULT="local_support" COMMENT="Component that triggered the SMS."/>
+        <FIELD NAME="success" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" COMMENT="1 if sent successfully, 0 if failed."/>
+        <FIELD NAME="response" TYPE="text" NOTNULL="false" COMMENT="API response (truncated)."/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="userid_fk" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="component_idx" UNIQUE="false" FIELDS="component"/>
+        <INDEX NAME="timecreated_idx" UNIQUE="false" FIELDS="timecreated"/>
+      </INDEXES>
+    </TABLE>
+  </TABLES>
+</XMLDB>

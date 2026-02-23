@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="local/organizational/db" VERSION="2026021400" COMMENT="XMLDB file for local_organizational plugin."
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
+>
+  <TABLES>
+    <TABLE NAME="local_organizational" COMMENT="Organizational matters linked to directions.">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" COMMENT="Organizational matter title."/>
+        <FIELD NAME="message" TYPE="text" NOTNULL="true" COMMENT="Organizational matter body (HTML)."/>
+        <FIELD NAME="messageformat" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="1" COMMENT="Text format for message field."/>
+        <FIELD NAME="directionid" TYPE="int" LENGTH="10" NOTNULL="true" COMMENT="Linked direction ID."/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="usercreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="usermodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="directionid_fk" TYPE="foreign" FIELDS="directionid" REFTABLE="local_recruitment_course" REFFIELDS="id"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="local_organizational_nhist" COMMENT="Notification history for organizational matters.">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="organizationalid" TYPE="int" LENGTH="10" NOTNULL="true" COMMENT="Organizational matter ID."/>
+        <FIELD NAME="usercreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" COMMENT="Admin who sent the notification."/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" COMMENT="When notification was sent."/>
+        <FIELD NAME="recipientcount" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" COMMENT="Number of recipients."/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="organizationalid_fk" TYPE="foreign" FIELDS="organizationalid" REFTABLE="local_organizational" REFFIELDS="id"/>
+      </KEYS>
+    </TABLE>
+  </TABLES>
+</XMLDB>

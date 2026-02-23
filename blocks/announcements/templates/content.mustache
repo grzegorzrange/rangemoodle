@@ -1,0 +1,65 @@
+{{!
+    @template block_announcements/content
+
+    Announcement tiles with AJAX pagination.
+
+    Context variables required for this template:
+    * tiles - Array of announcement objects
+    * hastiles - Boolean whether tiles exist
+    * haspagination - Boolean whether pagination needed
+    * pages - Array of page objects with pagenum, page, active
+
+    Example context (json):
+    {
+        "hastiles": true,
+        "tiles": [
+            {"name": "Test", "text": "Content...", "date": "Monday, 19 February 2026, 12:00 PM", "attachcount": 2, "hasattachments": true, "viewurl": "#"}
+        ],
+        "haspagination": true,
+        "pages": [
+            {"pagenum": 1, "page": 0, "active": true},
+            {"pagenum": 2, "page": 1, "active": false}
+        ]
+    }
+}}
+{{#hastiles}}
+<div class="block-announcements-tiles">
+    <div class="row">
+        {{#tiles}}
+        <div class="col-md-4 mb-3">
+            <div class="card h-100 announcement-tile">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">{{name}}</h5>
+                    <p class="card-text text-muted small fst-italic mb-1">{{date}}</p>
+                    <p class="card-text flex-grow-1">{{text}}</p>
+                    {{#hasattachments}}
+                    <p class="card-text text-muted small">
+                        {{#str}}attachmentscount, block_announcements, {{attachcount}}{{/str}}
+                    </p>
+                    {{/hasattachments}}
+                    <div class="text-center mt-2">
+                        <a href="{{{viewurl}}}" class="btn btn-primary">
+                            {{#str}}enter, block_announcements{{/str}}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{/tiles}}
+    </div>
+</div>
+{{/hastiles}}
+{{^hastiles}}
+<p class="text-muted">{{#str}}noannouncements, block_announcements{{/str}}</p>
+{{/hastiles}}
+{{#haspagination}}
+<nav aria-label="Page navigation" class="mt-2">
+    <ul class="pagination justify-content-center mb-0">
+        {{#pages}}
+        <li class="page-item {{#active}}active{{/active}}">
+            <a class="page-link" href="#" data-page="{{page}}">{{pagenum}}</a>
+        </li>
+        {{/pages}}
+    </ul>
+</nav>
+{{/haspagination}}

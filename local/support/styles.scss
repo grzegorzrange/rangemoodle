@@ -1,0 +1,370 @@
+body {
+  font-family: 'Lato', sans-serif;
+}
+
+//@media (min-width: 769px) {
+//  #page {
+//    padding-left: 260px !important;
+//  }
+//}
+
+#topofscroll{
+  max-width: 100% !important;
+}
+
+.course-content{
+  .section-item{
+    background: #fff;
+  }
+}
+
+#page-course-view-archive{
+  #local-dashboard-sidebar{
+    height: 340px !important;
+  }
+
+  #theme_boost-drawers-courseindex{
+    width: 260px;
+    max-width: 260px;
+    right: 0;
+    left: 0;
+    height: calc(100% - 400px);
+    padding-bottom: 15px;
+    bottom: 0;
+    top: unset;
+    border-right: 1px solid #dee2e6;
+    background: #fff;
+    padding-top: 15px;
+    .drawerheader{
+      width: 100%;
+      height: 50px;
+      .drawerheadercontent{
+        position: absolute;
+        right: 0;
+        padding-top: 12px;
+      }
+    }
+    .drawercontent{
+      height: 100% !important;
+      padding: 0 !important;
+    }
+    .courseindex-section{
+      border: none !important;
+    }
+  }
+
+  .courseindex-item{
+    margin: 5px 10px;
+  }
+
+  .courseindex-item.pageitem{
+    border-radius: 5px !important;
+    a{
+      color: #fff;
+    }
+    .courseindex-link{
+      color: #fff;
+    }
+  }
+}
+
+.btn-primary {
+  color: #fff !important;
+  padding: 9px 32px !important;
+  border-radius: 100px !important;
+  font-weight: 700 !important;
+  &:hover{
+    background: #c51b01 !important;
+    color: #d4d4d4 !important;
+  }
+}
+
+.btn-secondary{
+  color: #565454 !important;
+  border: solid 1px #e63612 !important;
+  background: #fff !important;
+  padding: 9px 32px !important;
+  border-radius: 100px !important;
+  font-weight: 700 !important;
+}
+
+section{
+  padding: 16px 24px 16px 24px;
+  border-radius: 10px;
+  box-shadow: 0px 2px 6px 0px #0000002e;
+}
+
+.navbar-brand{
+  width: 250px !important;
+  img{
+    padding: 5px !important;
+  }
+}
+
+.btn-change-recruitment{
+  color: #fff !important;
+  padding: 6px 26px !important;
+  border-radius: 100px !important;
+  font-weight: 700 !important;
+  background: #e63612;
+  &:hover{
+    background: #c51b01 !important;
+    color: #d4d4d4 !important;
+  }
+}
+
+body,
+#page,
+#topofscroll,
+#page-wrapper,
+#page-header,
+.secondary-navigation .navigation,
+.secondary-navigation .more-nav,
+.notifications,
+div[role="main"]
+{
+  background: #f7f7f7;
+  background-color: #f7f7f7;
+}
+
+#block-region-content{
+  box-shadow: none !important;
+  padding: 0 !important;
+  border: none !important;
+}
+
+.login-container,
+.block_announcements{
+  padding: 16px 24px 16px 24px;
+  border-radius: 10px;
+  box-shadow: 0px 2px 6px 0px #0000002e;
+}
+
+.search-icon{
+  border-top-left-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
+  padding: 10px 15px !important;
+}
+
+.drawer-toggles{
+  display: none !important;
+}
+
+#page-local-dashboard-index{
+  #page{
+    #topofscroll{
+      padding: 16px 24px 16px 24px;
+      border-radius: 10px;
+      box-shadow: 0px 2px 6px 0px #0000002e;
+      background: #fff;
+      background-color: #fff;
+      .local-dashboard-select .row{
+        text-align: center;
+        justify-content: center;
+        margin-top: 100px;
+      }
+    }
+  }
+  #page-header,
+  div[role="main"]{
+    background: #fff !important;
+  }
+  #page{
+    min-height: 80%;
+  }
+}
+
+#page-login-forgot_password,
+#page-login-index{
+  div[role="main"]{
+    background: #fff !important;
+  }
+  #logoimage{
+    padding: 30px;
+  }
+}
+
+.user-view{
+  .primary-navigation{
+    display: none !important;
+  }
+}
+
+.primary-navigation li[data-key="home"],
+.primary-navigation li[data-key="mycourses"] {
+  display: none !important;
+}
+
+.block-announcements-tiles {
+  .announcement-tile {
+    transition: box-shadow 0.15s ease;
+    box-shadow: 0px 0px 3px 0px #0000004d !important;
+    border: solid 1px #e63612 !important;
+
+    &:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-title {
+      font-size: 1rem;
+      color: #4a4444;
+      font-weight: 600;
+      padding-bottom: 10px;
+    }
+
+    .card-text {
+      font-size: 0.875rem;
+      color: #4a4444;
+    }
+  }
+}
+
+.mydata-profile {
+  .mydata-icon-wrapper {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: #e63612;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .card {
+    border-radius: 12px;
+    transition: box-shadow 0.15s ease;
+
+    &:hover {
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12) !important;
+    }
+  }
+}
+
+[data-region="block-announcements"] {
+  transition: opacity 0.2s ease;
+
+  &.block-announcements-loading {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  .pagination .page-link[data-page] {
+    cursor: pointer;
+  }
+}
+
+#page-local-dashboard-mydata{
+  div[role="main"]{
+    h2{
+      display: none;
+    }
+  }
+}
+
+#page-local-dashboard-mydata,
+#page-local-financial-view,
+#page-local-organizational-view,
+#page-local-schedule-view{
+  #page-header{
+    margin-bottom: 20px;
+  }
+}
+
+#page-mod-quiz-view{
+  #region-main{
+    background-color: #f7f7f7;
+  }
+}
+
+.drawer-left{
+  max-width: 260px !important;
+  width: 260px !important;
+  .drawercontent.drag-container{
+    .list-group{
+      display: none !important;
+    }
+    a.list-group-item{
+      color: #333;
+      transition: background-color 0.15s ease;
+      margin: 2px 10px;
+      border-radius: 5px;
+      padding-left: 10px !important;
+      padding-right: 10px !important;
+      margin-bottom: 10px;
+      i{
+        width: 20px;
+        text-align: center;
+        color: #e63612 !important;
+        margin-right: 5px !important;
+      }
+    }
+  }
+}
+
+#archive-courseindex-dropdown-panel{
+  border-radius: 3px;
+  .courseindex-item-content{
+    .courseindex-link{
+      padding-left: 35px;
+      font-weight: 600;
+      color: #000 !important;
+    }
+  }
+  .dir-rtl-hide {
+    color: #e63612 !important;
+  }
+}
+
+.footer-content-debugging{
+  display: none !important;
+}
+
+#page-mod-quiz-review,
+#page-mod-quiz-attempt{
+  #responseform{
+    img{
+      max-width: 100%;
+    }
+  }
+  .que{
+    img{
+      max-width: 100%;
+    }
+  }
+}
+
+// Force quiz navigation drawer to always be visible on quiz attempt pages.
+#page-mod-quiz-attempt,
+#page-mod-quiz-review {
+  .drawer.drawer-right {
+    background: #f7f7f7;
+    background-color: #f7f7f7;
+    right: 0 !important;
+    visibility: visible !important;
+    #mod_quiz_navblock{
+      margin-top: 50%;
+    }
+  }
+  #page.drawers {
+    margin-right: 315px !important;
+    padding-right: 1rem !important;
+  }
+  .drawer-right-toggle {
+    display: none !important;
+  }
+  .drawer.drawer-right .drawerheader .drawertoggle {
+    display: none !important;
+  }
+}
+
+#theme_boost-drawers-blocks{
+  .drawerheader{
+    display: none;
+  }
+}
+
+div[data-region="footer-container-popover"]{
+  display: none !important;
+}

@@ -1,0 +1,123 @@
+/* format_archive: Hide drawer + toggle on mobile, show dropdown instead. */
+@media (max-width: 767.98px) {
+    body.format-archive #theme_boost-drawers-courseindex {
+        display: none !important;
+    }
+    body.format-archive .drawer-left-toggle {
+        display: none !important;
+    }
+}
+
+/* Mobile dropdown wrapper */
+.archive-ci-dropdown-wrapper {
+    position: relative;
+    padding: 0.5rem 1rem;
+    padding-bottom: 0 !important;
+}
+
+/* Dropdown toggle button */
+.archive-ci-dropdown-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.6rem 1rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+    border-radius: 0.5rem;
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+    color: #333;
+}
+.archive-ci-dropdown-btn:hover,
+.archive-ci-dropdown-btn:focus {
+    background-color: #f8f9fa;
+    border-color: #adb5bd;
+}
+.archive-ci-dropdown-btn .archive-ci-chevron {
+    transition: transform 0.2s ease;
+    font-size: 0.75rem;
+}
+.archive-ci-dropdown-btn.open .archive-ci-chevron {
+    transform: rotate(180deg);
+}
+
+/* Dropdown panel */
+.archive-ci-dropdown-panel {
+    display: none;
+    position: absolute;
+    left: 1rem;
+    right: 1rem;
+    top: 100%;
+    z-index: 1050;
+    background: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 0 0 0.5rem 0.5rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    max-height: 60vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+.archive-ci-dropdown-panel.open {
+    display: block;
+}
+
+/* Cloned courseindex content inside the dropdown panel */
+.archive-ci-panel-content {
+    padding: 0.5rem 0;
+}
+
+/* Make cloned courseindex links clickable with pointer cursor */
+.archive-ci-panel-content .courseindex-link {
+    cursor: pointer;
+}
+
+/* Style section titles as non-clickable headers */
+.archive-ci-panel-content span.courseindex-link[data-action="togglecourseindexsection"] {
+    cursor: default;
+    font-weight: 600;
+}
+
+/* Activity items in the cloned courseindex */
+.archive-ci-panel-content [data-for="cm"] .courseindex-link:hover {
+    background-color: #e9ecef;
+    border-radius: 0.25rem;
+}
+
+/* Backdrop */
+.archive-ci-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 1040;
+    background: rgba(0,0,0,0.25);
+}
+.archive-ci-backdrop.open {
+    display: block;
+}
+
+/* Ensure the wrapper has a higher z-index than backdrop */
+.archive-ci-dropdown-wrapper {
+    position: relative;
+    z-index: 1;
+}
+
+/* Archive menu header at top of course index drawer */
+.archive-menu {
+    padding: 12px 16px 0 16px;
+    font-weight: 700;
+    color: #1d2125bf;
+    border-top: 1px solid #dee2e6;
+    background: #fff;
+    font-size: .875em;
+    text-transform: uppercase !important;
+    width: 100%;
+}
+
+/* Desktop: section titles non-clickable cursor */
+body.format-archive #theme_boost-drawers-courseindex span.courseindex-link[data-action="togglecourseindexsection"] {
+    cursor: default;
+}
+body.format-archive #theme_boost-drawers-courseindex span.courseindex-link[data-action="togglecourseindexsection"]:hover {
+    text-decoration: none;
+}

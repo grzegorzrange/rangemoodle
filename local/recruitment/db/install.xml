@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="local/recruitment/db" VERSION="20260222" COMMENT="XMLDB file for local_recruitment"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
+>
+  <TABLES>
+    <TABLE NAME="local_recruitment" COMMENT="Recruitment records (parent container).">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="Recruitment name e.g. ELE.02 - 02.2026"/>
+        <FIELD NAME="recruitmentdate" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Recruitment date as unix timestamp"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="usercreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="usercreated" TYPE="foreign" FIELDS="usercreated" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="local_recruitment_course" COMMENT="Directions (courses/kierunki) within a recruitment.">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="recruitmentid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Parent recruitment ID"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="Direction name e.g. Technik informatyk"/>
+        <FIELD NAME="basecategoryid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Source category (subcategory of kategorie_bazowe)"/>
+        <FIELD NAME="archive_course" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Copied archive course ID"/>
+        <FIELD NAME="preparation_course" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Copied preparation course ID"/>
+        <FIELD NAME="quizes_course" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Copied internal tests course ID"/>
+        <FIELD NAME="target_categoryid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Target category for copied courses"/>
+        <FIELD NAME="cohortid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Auto-created cohort ID"/>
+        <FIELD NAME="copystatus" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1" SEQUENCE="false" COMMENT="Course copy status: 0=copying in progress, 1=done"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="usercreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="recruitmentid" TYPE="foreign" FIELDS="recruitmentid" REFTABLE="local_recruitment" REFFIELDS="id"/>
+        <KEY NAME="basecategoryid" TYPE="foreign" FIELDS="basecategoryid" REFTABLE="course_categories" REFFIELDS="id"/>
+        <KEY NAME="archive_course" TYPE="foreign" FIELDS="archive_course" REFTABLE="course" REFFIELDS="id"/>
+        <KEY NAME="preparation_course" TYPE="foreign" FIELDS="preparation_course" REFTABLE="course" REFFIELDS="id"/>
+        <KEY NAME="quizes_course" TYPE="foreign" FIELDS="quizes_course" REFTABLE="course" REFFIELDS="id"/>
+        <KEY NAME="target_categoryid" TYPE="foreign" FIELDS="target_categoryid" REFTABLE="course_categories" REFFIELDS="id"/>
+        <KEY NAME="cohortid" TYPE="foreign" FIELDS="cohortid" REFTABLE="cohort" REFFIELDS="id"/>
+        <KEY NAME="usercreated" TYPE="foreign" FIELDS="usercreated" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="local_recruitment_user" COMMENT="Users imported into directions with declaration flag.">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="directionid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="recruitmentid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="declaration" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="notified" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="1 if email+sms notification was sent"/>
+        <FIELD NAME="timenotified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Timestamp when notification was sent"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="usercreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="userid_fk" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+        <KEY NAME="directionid_fk" TYPE="foreign" FIELDS="directionid" REFTABLE="local_recruitment_course" REFFIELDS="id"/>
+        <KEY NAME="recruitmentid_fk" TYPE="foreign" FIELDS="recruitmentid" REFTABLE="local_recruitment" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="userid_directionid_uq" UNIQUE="true" FIELDS="userid,directionid"/>
+      </INDEXES>
+    </TABLE>
+  </TABLES>
+</XMLDB>

@@ -1,0 +1,37 @@
+{{!
+    @template local_dashboard/announcement_view
+
+    Full announcement view with attachments.
+
+    Context variables required for this template:
+    * name - Announcement name
+    * message - Formatted announcement message HTML
+    * hasattachments - Whether there are attachments
+    * attachments - Array of attachment objects with url and filename
+    * str_attachments - Attachments heading
+    * backurl - URL to go back
+    * str_back - Back button label
+
+    Example context (json):
+    {
+        "name": "Test Announcement",
+        "message": "<p>Some content</p>",
+        "hasattachments": true,
+        "attachments": [{"url": "#", "filename": "file.pdf"}],
+        "str_attachments": "Attachments",
+        "backurl": "/my/",
+        "str_back": "Back"
+    }
+}}
+{{{message}}}
+{{#hasattachments}}
+<h4>{{str_attachments}}</h4>
+<ul>
+    {{#attachments}}
+    <li><a href="{{{url}}}">{{filename}}</a></li>
+    {{/attachments}}
+</ul>
+{{/hasattachments}}
+<div class="mt-3">
+    <a href="{{{backurl}}}" class="btn btn-secondary">{{str_back}}</a>
+</div>

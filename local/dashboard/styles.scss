@@ -1,0 +1,130 @@
+/* local_dashboard styles */
+
+/* Desktop: fixed sidebar on the left */
+.local-dashboard-sidebar {
+    position: fixed;
+    top: 70px;
+    left: 0;
+    width: 260px;
+    height: calc(100vh - 60px);
+    background-color: #fff;
+    border-right: 1px solid #dee2e6;
+    overflow-y: auto;
+    z-index: 1030;
+    padding: 0;
+    padding-top: 5px;
+
+    .sidebar-link {
+        color: #333;
+        transition: background-color 0.15s ease;
+        margin: 2px 10px;
+        border-radius: 5px;
+        padding-left: 10px !important;
+        padding-right: 10px !important;
+
+        &:hover {
+            background-color: #e9ecef;
+            color: #e63612;
+
+            .sidebar-icon {
+                color: #e63612;
+            }
+        }
+
+        &.active {
+            background-color: #e63612;
+            color: #fff;
+
+            .sidebar-icon {
+                color: #fff;
+            }
+        }
+    }
+
+    .sidebar-icon {
+        width: 20px;
+        text-align: center;
+        color: #e63612;
+        margin-right: 5px !important;
+    }
+}
+
+/* Desktop: push main content to the right when sidebar is present */
+body.has-dashboard-sidebar {
+    #page {
+        #page-content,
+        .secondary-navigation,
+        #page-header {
+            margin-left: 260px;
+        }
+    }
+    #page-footer {
+        margin-left: 260px;
+    }
+}
+
+/* Mobile: hide the fixed sidebar (items are injected into Boost drawer via JS) */
+@media (max-width: 767.98px) {
+    .local-dashboard-sidebar {
+        display: none !important;
+    }
+
+    body.has-dashboard-sidebar {
+        #page {
+            #page-content,
+            .secondary-navigation,
+            #page-header {
+                margin-left: 0;
+            }
+        }
+        #page-footer {
+            margin-left: 0;
+        }
+    }
+}
+
+/* Mobile drawer section styling */
+#local-dashboard-mobile-section {
+    .sidebar-section-title {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        font-weight: 600;
+        color: #6c757d;
+        padding: 0.5rem 1rem;
+    }
+
+    .sidebar-icon {
+        width: 20px;
+        text-align: center;
+        color: #6c757d;
+        margin-right: 0.75rem;
+    }
+
+    .list-group-item.active .sidebar-icon {
+        color: #fff;
+    }
+}
+
+/* Recruitment selection cards */
+.local-dashboard-select .card {
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    border: 1px solid #dee2e6;
+
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        border-color: #e63612;
+    }
+}
+
+.userinitials{
+    background: #fef5f3;
+    color: #e63612;
+}
+
+#page-my-index{
+    .card-title{
+        font-weight: 700;
+        font-size: 22px;
+    }
+}

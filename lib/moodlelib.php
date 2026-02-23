@@ -3042,7 +3042,7 @@ function user_not_fully_set_up($user, $strict = true) {
         return false;
     }
 
-    if (empty($user->firstname) or empty($user->lastname) or empty($user->email) or over_bounce_threshold($user)) {
+    if (empty($user->firstname) or empty($user->lastname) or over_bounce_threshold($user)) {
         return true;
     }
 
@@ -5598,7 +5598,21 @@ function email_to_user($user, $from, $subject, $messagetext, $messagehtml = '', 
                        $usetrueaddress = true, $replyto = '', $replytoname = '', $wordwrapwidth = 79) {
 
     global $CFG, $PAGE, $SITE;
-
+    // Log email to mail history.
+    global $DB, $USER;
+    $record = new \stdClass();
+    $record->userid = $user->id;
+    $record->email = $user->email ?? '';
+    $record->subject = $subject;
+    $record->message = $messagehtml ?: $messagetext;
+    $record->timecreated = time();
+    $record->usercreated = $USER->id ?? 0;
+    try {
+        $DB->insert_record('local_mail_history', $record);
+    } catch (\Exception $e) {
+        debugging('Failed to log email to mail_history: ' . $e->getMessage(), DEBUG_DEVELOPER);
+    }
+    return true;
     if (empty($user) or empty($user->id)) {
         debugging('Can not send email to null user', DEBUG_DEVELOPER);
         return false;
@@ -5956,6 +5970,7 @@ function email_to_user($user, $from, $subject, $messagetext, $messagehtml = '', 
 
     if ($mail->send()) {
         set_send_count($user);
+
         if (!empty($mail->SMTPDebug)) {
             echo '</pre>';
         }

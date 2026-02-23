@@ -1,0 +1,51 @@
+{{!
+    @template local_userprogress/filter_form
+
+    Filter form for user progress report.
+
+    Context variables required for this template:
+    * actionurl - Form action URL
+    * reseturl - Reset filters URL
+    * fields - Array of filter field objects with id, name, label, type, value
+    * selects - Array of select field objects with id, name, label, options (array of value, label, selected)
+    * str_filter - Filter button label
+    * str_reset - Reset button label
+
+    Example context (json):
+    {
+        "actionurl": "/local/userprogress/index.php",
+        "reseturl": "/local/userprogress/index.php?resetfilters=1",
+        "fields": [
+            {"id": "filter-firstname", "name": "firstname", "label": "First name", "type": "text", "value": ""}
+        ],
+        "selects": [
+            {"id": "filter-recruitment", "name": "recruitmentid", "label": "Recruitment", "options": [{"value": "0", "label": "All", "selected": true}]}
+        ],
+        "str_filter": "Filter",
+        "str_reset": "Reset filters"
+    }
+}}
+<form method="get" action="{{{actionurl}}}" class="mb-3">
+    <div class="row align-items-end">
+        {{#fields}}
+        <div class="col-auto">
+            <label for="{{id}}">{{label}}</label>
+            <input type="{{type}}" id="{{id}}" name="{{name}}" value="{{value}}" class="form-control" />
+        </div>
+        {{/fields}}
+        {{#selects}}
+        <div class="col-auto">
+            <label for="{{id}}">{{label}}</label>
+            <select id="{{id}}" name="{{name}}" class="form-control">
+                {{#options}}
+                <option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>
+                {{/options}}
+            </select>
+        </div>
+        {{/selects}}
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary">{{str_filter}}</button>
+            <a href="{{{reseturl}}}" class="btn btn-secondary">{{str_reset}}</a>
+        </div>
+    </div>
+</form>

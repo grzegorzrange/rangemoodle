@@ -30,7 +30,7 @@
 .tiny-aiplacement-spinner-style {
     width: 3rem !important; /* stylelint-disable-line declaration-no-important */
     height: 3rem !important; /* stylelint-disable-line declaration-no-important */
-    color: #0f6cbf;
+    color: #e63612;
     z-index: 1000;
 }
 
@@ -179,7 +179,7 @@
     font-size: 1.5rem;
     font-weight: bold;
     margin-bottom: 10px;
-    color: #0f6cbf;
+    color: #e63612;
 }
 
 .ai-policy-display {

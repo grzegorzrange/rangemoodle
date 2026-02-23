@@ -1,6 +1,6 @@
 .ai-drawer {
     position: fixed;
-    top: 60px;
+    top: 70px;
     bottom: 0;
     right: calc(-315px + -10px);
     width: 315px;
@@ -16,7 +16,7 @@
 
 .ai-drawer-header {
     padding: 0;
-    height: 60px;
+    height: 70px;
     display: flex;
     align-items: center;
 }

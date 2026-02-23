@@ -49,7 +49,7 @@ function theme_boost_get_extra_scss($theme) {
 
     // Sets the background image, and its settings.
     if (!empty($imageurl)) {
-        $content .= '@media (min-width: 768px) {';
+        $content .= '@media (min-width: 769px) {';
         $content .= 'body { ';
         $content .= "background-image: url('$imageurl'); background-size: cover;";
         $content .= ' } }';
@@ -61,6 +61,16 @@ function theme_boost_get_extra_scss($theme) {
         $content .= 'body.pagelayout-login #page { ';
         $content .= "background-image: url('$loginbackgroundimageurl'); background-size: cover;";
         $content .= ' }';
+    }
+
+    // Load SCSS from local plugins (styles.scss files).
+    global $CFG;
+    $localplugins = core_component::get_plugin_list('local');
+    foreach ($localplugins as $pluginname => $plugindir) {
+        $scssfile = $plugindir . '/styles.scss';
+        if (file_exists($scssfile)) {
+            $content .= "\n/* local_{$pluginname} */\n" . file_get_contents($scssfile);
+        }
     }
 
     // Always return the background image with the scss when we have it.

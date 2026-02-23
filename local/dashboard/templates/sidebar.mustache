@@ -1,0 +1,66 @@
+{{!
+    @template local_dashboard/sidebar
+
+    Sidebar menu for the dashboard.
+
+    Context variables required for this template:
+    * menuitems - Array of menu items with key, text, icon, url, active
+    * hasadminitems - Whether admin items should be shown
+    * adminitems - Array of admin menu items with text, icon, url
+
+    Example context (json):
+    {
+        "menuitems": [
+            {"key": "dashboard", "text": "Dashboard", "icon": "fa-gauge-high", "url": "#", "active": true}
+        ],
+        "hasadminitems": true,
+        "adminitems": [
+            {"text": "Recruitments", "icon": "fa-users-gear", "url": "#"}
+        ]
+    }
+}}
+<nav class="local-dashboard-sidebar" id="local-dashboard-sidebar" aria-label="{{#str}}sidebar, local_dashboard{{/str}}">
+    {{#hasadminitems}}
+    <div class="sidebar-section">
+        <div class="sidebar-section-title px-3 py-2 text-uppercase small fw-bold text-muted">
+            {{#str}}administration, local_dashboard{{/str}}
+        </div>
+        <ul class="list-unstyled mb-0">
+            {{#adminitems}}
+            <li>
+                <a href="{{{url}}}" class="sidebar-link d-flex align-items-center px-3 py-2 text-decoration-none {{#active}}active{{/active}}">
+                    <i class="fa-solid {{icon}} sidebar-icon me-3"></i>
+                    <span>{{text}}</span>
+                </a>
+            </li>
+            {{/adminitems}}
+        </ul>
+    </div>
+    {{/hasadminitems}}
+    {{#hasmenuitems}}
+    <ul class="list-unstyled mb-0">
+        {{#menuitems}}
+        <li>
+            <a href="{{{url}}}" class="sidebar-link d-flex align-items-center px-3 py-2 text-decoration-none {{#active}}active{{/active}}">
+                <i class="fa-solid {{icon}} sidebar-icon me-3"></i>
+                <span>{{text}}</span>
+            </a>
+        </li>
+        {{/menuitems}}
+    </ul>
+    {{/hasmenuitems}}
+    {{#hasadminquickitems}}
+    <div class="sidebar-section mt-2 border-top pt-2 d-none" id="admin-quick-items" aria-hidden="true">
+        <ul class="list-unstyled mb-0">
+            {{#adminquickitems}}
+            <li>
+                <a href="{{{url}}}" class="sidebar-link d-flex align-items-center px-3 py-2 text-decoration-none {{#active}}active{{/active}}">
+                    <i class="fa-solid {{icon}} sidebar-icon me-3"></i>
+                    <span>{{text}}</span>
+                </a>
+            </li>
+            {{/adminquickitems}}
+        </ul>
+    </div>
+    {{/hasadminquickitems}}
+</nav>

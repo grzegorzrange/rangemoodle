@@ -46,10 +46,20 @@ $extraclasses = ['uses-drawers'];
 if ($courseindexopen) {
     $extraclasses[] = 'drawer-open-index';
 }
+if(is_siteadmin()){
+    $extraclasses[] = 'admin-view';
+}else{
+    $extraclasses[] = 'user-view';
+}
 
+$bodyattributes = $OUTPUT->body_attributes($extraclasses);
 $blockshtml = $OUTPUT->blocks('side-pre');
 $hasblocks = (strpos($blockshtml, 'data-block=') !== false || !empty($addblockbutton));
 if (!$hasblocks) {
+    $blockdraweropen = false;
+}
+// Only allow the right drawer to open on /mod/quiz/ pages.
+if (strpos($PAGE->url->get_path(), '/mod/quiz/') === false) {
     $blockdraweropen = false;
 }
 $courseindex = core_course_drawer();

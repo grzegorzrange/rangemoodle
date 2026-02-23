@@ -1,0 +1,25 @@
+{{!
+    @template local_recruitment/courses_header
+
+    Back link and add direction button for courses listing.
+
+    Context variables required for this template:
+    * backurl - URL to go back to recruitments
+    * str_back - Back link text
+    * addurl - URL to add a new direction
+    * str_add - Add button label
+
+    Example context (json):
+    {
+        "backurl": "/local/recruitment/index.php",
+        "str_back": "Back to recruitments",
+        "addurl": "/local/recruitment/course_edit.php?rid=1",
+        "str_add": "Add direction"
+    }
+}}
+<div class="mb-3">
+    <a href="{{{backurl}}}">&laquo; {{str_back}}</a>
+</div>
+<div class="mb-3">
+    <a href="{{{addurl}}}" class="btn btn-secondary">{{str_add}}</a>
+</div>

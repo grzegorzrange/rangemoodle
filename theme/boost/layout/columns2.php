@@ -30,6 +30,12 @@ require_once($CFG->libdir . '/behat/lib.php');
 $addblockbutton = $OUTPUT->addblockbutton();
 
 $extraclasses = [];
+if(is_siteadmin()){
+    $extraclasses[] = 'admin-view';
+}else{
+    $extraclasses[] = 'user-view';
+}
+
 $bodyattributes = $OUTPUT->body_attributes($extraclasses);
 $blockshtml = $OUTPUT->blocks('side-pre');
 $hasblocks = (strpos($blockshtml, 'data-block=') !== false || !empty($addblockbutton));
