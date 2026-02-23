@@ -137,7 +137,8 @@ class observer {
         ]);
 
         // Send summary JSON to Make.com webhook.
-        $webhookurl = 'https://hook.eu1.make.com/mbap9pmyic7du9q1dcadqbet6wx4tmu6';
+//        $webhookurl = 'https://hook.eu1.make.com/mbap9pmyic7du9q1dcadqbet6wx4tmu6';
+        $webhookurl = 'https://hook.eu2.make.com/xatv1spkbpqi781xsbw6a9uh7pd4fljc';
         $curl = new \curl();
         $curl->setHeader(['Content-Type: application/json']);
         $response = $curl->post($webhookurl, $json);

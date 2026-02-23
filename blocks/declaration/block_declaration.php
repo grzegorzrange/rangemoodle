@@ -83,7 +83,7 @@ class block_declaration extends block_base {
         }
 
         $catidnumber = $category->idnumber;
-        $linkurl = 'https://testowylink.pl?recruitment=' . urlencode($catidnumber);
+        $linkurl = 'https://egzaminy.webrange0.usermd.net/wybor-egzaminow/?recruitment=' . urlencode($catidnumber);
 
         $this->content->text = html_writer::link(
             $linkurl,
