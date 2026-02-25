@@ -111,7 +111,7 @@ foreach ($stmt as $col) {
                 CONVERT(CAST(CONVERT({$column} USING latin1) AS BINARY) USING utf8mb4) AS fixed
            FROM {{$table}}
           WHERE ({$where})
-            AND {$column} != CONVERT(CAST(CONVERT({$column} USING latin1) AS BINARY) USING utf8mb4)
+            AND {$column} COLLATE utf8mb4_bin != CONVERT(CAST(CONVERT({$column} USING latin1) AS BINARY) USING utf8mb4)
           LIMIT 5",
         $markerparams
     );
@@ -125,7 +125,7 @@ foreach ($stmt as $col) {
     $realcount = $DB->count_records_sql(
         "SELECT COUNT(*) FROM {{$table}}
           WHERE ({$where})
-            AND {$column} != CONVERT(CAST(CONVERT({$column} USING latin1) AS BINARY) USING utf8mb4)",
+            AND {$column} COLLATE utf8mb4_bin != CONVERT(CAST(CONVERT({$column} USING latin1) AS BINARY) USING utf8mb4)",
         $markerparams
     );
 
@@ -156,7 +156,7 @@ foreach ($stmt as $col) {
             "UPDATE {{$table}}
                 SET {$column} = CONVERT(CAST(CONVERT({$column} USING latin1) AS BINARY) USING utf8mb4)
               WHERE ({$where})
-                AND {$column} != CONVERT(CAST(CONVERT({$column} USING latin1) AS BINARY) USING utf8mb4)",
+                AND {$column} COLLATE utf8mb4_bin != CONVERT(CAST(CONVERT({$column} USING latin1) AS BINARY) USING utf8mb4)",
             $markerparams
         );
         $totalfixed += $realcount;
