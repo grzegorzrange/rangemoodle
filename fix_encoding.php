@@ -75,6 +75,11 @@ $skiptables = [
     'local_mail_history',
 ];
 
+// Specific table.column pairs to skip (cause conversion errors).
+$skipcolumns = [
+    'notifications.fullmessagehtml',
+];
+
 foreach ($cols as $col) {
     $fulltable = $col->tablename;
     $column = $col->columnname;
@@ -87,6 +92,11 @@ foreach ($cols as $col) {
 
     // Skip excluded tables.
     if (in_array($table, $skiptables)) {
+        continue;
+    }
+
+    // Skip excluded table.column pairs.
+    if (in_array($table . '.' . $column, $skipcolumns)) {
         continue;
     }
 
