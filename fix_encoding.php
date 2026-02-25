@@ -66,8 +66,15 @@ $totalfixed = 0;
 $affectedtables = [];
 
 foreach ($stmt as $col) {
-    $table = $col->tablename;
+    $fulltable = $col->tablename;
     $column = $col->columnname;
+
+    // Strip prefix — Moodle DML {table} adds it automatically.
+    if (strpos($fulltable, $prefix) === 0) {
+        $table = substr($fulltable, strlen($prefix));
+    } else {
+        $table = $fulltable;
+    }
 
     // Count rows with the double-encoding marker.
     $count = $DB->count_records_sql(
