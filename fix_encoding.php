@@ -2,6 +2,11 @@
 // Script to fix double-encoded UTF-8 in Moodle database.
 // Upload to Moodle root and run via browser (as admin) or CLI.
 //
+// Modes:
+//   default (no params)  = count only — shows affected tables/columns with row counts
+//   ?preview=1           = show PRZED/PO samples (max 5 per column)
+//   ?fix=1&sesskey=xxx   = apply the fix
+//
 // IMPORTANT: Make a database backup before running this!
 
 define('CLI_SCRIPT', (php_sapi_name() === 'cli'));
@@ -15,45 +20,44 @@ if (!CLI_SCRIPT) {
     echo '<html><head><meta charset="utf-8"><title>Fix Encoding</title></head><body><pre>';
 }
 
-// Double-encoded UTF-8 markers — binary sequences that indicate broken encoding.
-// These are the raw byte sequences for common double-encoded Polish characters.
-// Using COLLATE utf8mb4_bin ensures exact binary matching (no accent/case folding).
-$markers = [
-    'Ä…',  // ą double-encoded
-    'Ä™',  // ę double-encoded
-    'Å›',  // ś double-encoded
-    'Å‚',  // ł double-encoded
-    'Å¼',  // ż double-encoded
-    'Åº',  // ź double-encoded
-    'Ä‡',  // ć double-encoded
-    'Å„',  // ń double-encoded
-    'Ã³',  // ó double-encoded
-    'Ä„',  // Ą double-encoded
-    'Ä˜',  // Ę double-encoded
-    'Åš',  // Ś double-encoded
-    'Å',   // Ł double-encoded (Å + next char)
-    'Å»',  // Ż double-encoded
-    'Å¹',  // Ź double-encoded
-    'Ä†',  // Ć double-encoded
-    'Å�',  // Ń double-encoded
-    'Ã"',  // Ó double-encoded
-];
-
 $prefix = $CFG->prefix;
 $dbname = $CFG->dbname;
 
-echo "=== Moodle Double-Encoding Fix ===\n";
-echo "Database: $dbname\n";
-echo "Prefix: $prefix\n\n";
-
-// Dry run first, then fix.
-$dryrun = true;
+// Determine mode.
+$mode = 'count'; // default: just count
+if ((CLI_SCRIPT && in_array('--preview', $argv ?? [])) ||
+    (!CLI_SCRIPT && !empty($_GET['preview']))) {
+    $mode = 'preview';
+}
 if ((CLI_SCRIPT && in_array('--fix', $argv ?? [])) ||
     (!CLI_SCRIPT && isset($_GET['fix']) && $_GET['fix'] === '1' && confirm_sesskey())) {
-    $dryrun = false;
+    $mode = 'fix';
 }
 
-$stmt = $DB->get_recordset_sql(
+echo "=== Moodle Double-Encoding Fix ===\n";
+echo "Database: $dbname\n";
+echo "Prefix: $prefix\n";
+echo "Mode: $mode\n\n";
+
+// Double-encoded UTF-8 markers for Polish characters (binary sequences).
+$markers = [
+    'Ä…', 'Ä™', 'Å›', 'Å‚', 'Å¼', 'Åº', 'Ä‡', 'Å„', 'Ã³',
+    'Ä„', 'Ä˜', 'Åš', 'Å»', 'Å¹', 'Ä†', 'Ã"',
+];
+
+// Build WHERE fragments.
+$likeParts = [];
+$likeParams = [];
+$i = 0;
+foreach ($markers as $m) {
+    $likeParts[] = "COLUMN_PH LIKE :m{$i} COLLATE utf8mb4_bin";
+    $likeParams["m{$i}"] = '%' . $m . '%';
+    $i++;
+}
+$likeTemplate = implode(' OR ', $likeParts);
+
+// Get all text columns.
+$cols = $DB->get_recordset_sql(
     "SELECT TABLE_NAME AS tablename, COLUMN_NAME AS columnname
        FROM information_schema.COLUMNS
       WHERE TABLE_SCHEMA = :dbname
@@ -63,115 +67,102 @@ $stmt = $DB->get_recordset_sql(
     ['dbname' => $dbname, 'prefix' => $prefix . '%']
 );
 
-$totalfixed = 0;
 $totalrows = 0;
+$totalfixed = 0;
+$results = [];
 
-// Build the WHERE condition: match any of the double-encoded markers using BINARY comparison.
-$markerconditions = [];
-$markerparams = [];
-$i = 0;
-foreach ($markers as $m) {
-    $markerconditions[] = "COLUMN_PLACEHOLDER LIKE :marker{$i} COLLATE utf8mb4_bin";
-    $markerparams["marker{$i}"] = '%' . $m . '%';
-    $i++;
-}
-
-foreach ($stmt as $col) {
+foreach ($cols as $col) {
     $fulltable = $col->tablename;
     $column = $col->columnname;
 
-    // Strip prefix — Moodle DML {table} adds it automatically.
     if (strpos($fulltable, $prefix) === 0) {
         $table = substr($fulltable, strlen($prefix));
     } else {
         $table = $fulltable;
     }
 
-    // Build WHERE clause with binary collation for this column.
-    $where = str_replace('COLUMN_PLACEHOLDER', $column, implode(' OR ', $markerconditions));
+    $where = str_replace('COLUMN_PH', $column, $likeTemplate);
+    $changeWhere = "({$where}) AND {$column} COLLATE utf8mb4_bin != CONVERT(CAST(CONVERT({$column} USING latin1) AS BINARY) USING utf8mb4)";
 
-    // Count affected rows.
-    $count = $DB->count_records_sql(
-        "SELECT COUNT(*) FROM {{$table}} WHERE {$where}",
-        $markerparams
-    );
+    // Count rows that actually change.
+    try {
+        $count = $DB->count_records_sql(
+            "SELECT COUNT(*) FROM {{$table}} WHERE {$changeWhere}",
+            $likeParams
+        );
+    } catch (Exception $e) {
+        // Skip tables that cause errors (e.g. views, temp tables).
+        continue;
+    }
 
     if ($count == 0) {
         continue;
     }
 
+    $totalrows += $count;
+
+    if ($mode === 'count') {
+        echo "{$fulltable}.{$column} — {$count} rows\n";
+        continue;
+    }
+
+    // Preview or fix mode.
     echo "------------------------------------------------------------\n";
     echo "TABLE: {$fulltable}.{$column} ({$count} rows)\n";
     echo "------------------------------------------------------------\n";
 
-    // Show preview: current value vs fixed value (max 5 samples per column).
-    // Only show rows where the fix actually changes the value.
-    $samples = $DB->get_records_sql(
-        "SELECT id, {$column} AS val,
-                CONVERT(CAST(CONVERT({$column} USING latin1) AS BINARY) USING utf8mb4) AS fixed
-           FROM {{$table}}
-          WHERE ({$where})
-            AND {$column} COLLATE utf8mb4_bin != CONVERT(CAST(CONVERT({$column} USING latin1) AS BINARY) USING utf8mb4)
-          LIMIT 5",
-        $markerparams
-    );
+    if ($mode === 'preview') {
+        $samples = $DB->get_records_sql(
+            "SELECT id, {$column} AS val,
+                    CONVERT(CAST(CONVERT({$column} USING latin1) AS BINARY) USING utf8mb4) AS fixed
+               FROM {{$table}}
+              WHERE {$changeWhere}
+              LIMIT 5",
+            $likeParams
+        );
 
-    if (empty($samples)) {
-        echo "  (All rows match marker but conversion produces no change — skipping)\n\n";
-        continue;
+        foreach ($samples as $row) {
+            $before = mb_substr($row->val, 0, 120);
+            $after = mb_substr($row->fixed, 0, 120);
+            echo "  id={$row->id}\n";
+            echo "    PRZED: {$before}\n";
+            echo "    PO:    {$after}\n\n";
+        }
+
+        if ($count > 5) {
+            echo "  ... i " . ($count - 5) . " wiecej\n\n";
+        }
     }
 
-    // Recount only rows that actually change.
-    $realcount = $DB->count_records_sql(
-        "SELECT COUNT(*) FROM {{$table}}
-          WHERE ({$where})
-            AND {$column} COLLATE utf8mb4_bin != CONVERT(CAST(CONVERT({$column} USING latin1) AS BINARY) USING utf8mb4)",
-        $markerparams
-    );
-
-    if ($realcount == 0) {
-        echo "  (All rows match marker but conversion produces no change — skipping)\n\n";
-        continue;
-    }
-
-    echo "  (Rows that actually change: {$realcount})\n\n";
-
-    foreach ($samples as $row) {
-        $before = mb_substr($row->val, 0, 120);
-        $after = mb_substr($row->fixed, 0, 120);
-        echo "  id={$row->id}\n";
-        echo "    PRZED: {$before}\n";
-        echo "    PO:    {$after}\n\n";
-    }
-
-    if ($realcount > 5) {
-        echo "  ... i " . ($realcount - 5) . " wiecej\n\n";
-    }
-
-    $totalrows += $realcount;
-
-    if (!$dryrun) {
-        // Only update rows where the value actually changes.
+    if ($mode === 'fix') {
         $DB->execute(
             "UPDATE {{$table}}
                 SET {$column} = CONVERT(CAST(CONVERT({$column} USING latin1) AS BINARY) USING utf8mb4)
-              WHERE ({$where})
-                AND {$column} COLLATE utf8mb4_bin != CONVERT(CAST(CONVERT({$column} USING latin1) AS BINARY) USING utf8mb4)",
-            $markerparams
+              WHERE {$changeWhere}",
+            $likeParams
         );
-        $totalfixed += $realcount;
-        echo "  -> NAPRAWIONO {$realcount} rows\n\n";
+        $totalfixed += $count;
+        echo "  -> NAPRAWIONO {$count} rows\n\n";
     }
 }
 
-$stmt->close();
+$cols->close();
 
 echo "\n=== Podsumowanie ===\n";
-echo "Znalezionych rekordow do naprawy: {$totalrows}\n";
+echo "Rekordow do naprawy: {$totalrows}\n";
 
-if ($dryrun) {
-    echo "\nTo byl DRY RUN — nic nie zostalo zmienione.\n";
-    echo "Przejrzyj powyzsze zmiany PRZED -> PO.\n";
+if ($mode === 'count') {
+    echo "\nTo bylo tylko ZLICZANIE.\n";
+    if (CLI_SCRIPT) {
+        echo "Preview: php fix_encoding.php --preview\n";
+        echo "Fix:     php fix_encoding.php --fix\n";
+    } else {
+        echo "\n<a href=\"fix_encoding.php?preview=1\">POKAZ PODGLAD PRZED/PO</a>\n";
+        $fixurl = new moodle_url('/fix_encoding.php', ['fix' => '1', 'sesskey' => sesskey()]);
+        echo "<a href=\"" . $fixurl->out() . "\">NAPRAW (po przejrzeniu podgladu!)</a>\n";
+    }
+} else if ($mode === 'preview') {
+    echo "\nTo byl PODGLAD — nic nie zostalo zmienione.\n";
     if (CLI_SCRIPT) {
         echo "Aby naprawic: php fix_encoding.php --fix\n";
     } else {
