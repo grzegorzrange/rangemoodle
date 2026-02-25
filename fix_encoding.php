@@ -2,14 +2,6 @@
 // Script to fix double-encoded UTF-8 in Moodle database.
 // Upload to Moodle root and run via browser (as admin) or CLI.
 //
-// Double-encoding happens when UTF-8 data is inserted into a UTF-8 database
-// through a connection that was set to latin1. The fix:
-// CONVERT(CAST(CONVERT(column USING latin1) AS BINARY) USING utf8mb4)
-//
-// Usage:
-//   Browser: https://your-site/fix_encoding.php
-//   CLI:     php fix_encoding.php
-//
 // IMPORTANT: Make a database backup before running this!
 
 define('CLI_SCRIPT', (php_sapi_name() === 'cli'));
@@ -23,19 +15,13 @@ if (!CLI_SCRIPT) {
     echo '<html><head><meta charset="utf-8"><title>Fix Encoding</title></head><body><pre>';
 }
 
-// Marker pattern: double-encoded "ą" = 0xC3 0x84 in latin1 interpretation.
-// In double-encoded UTF-8, Polish chars like ą (C4 85) become (C3 84 C2 85).
-// We detect this by looking for "Ä" (0xC384) which is the telltale sign.
 $marker = 'Ä';
-
-// Only fix text/varchar columns in mdl_ tables.
 $prefix = $CFG->prefix;
 $dbname = $CFG->dbname;
 
 echo "=== Moodle Double-Encoding Fix ===\n";
 echo "Database: $dbname\n";
-echo "Prefix: $prefix\n";
-echo "Looking for double-encoded UTF-8...\n\n";
+echo "Prefix: $prefix\n\n";
 
 // Dry run first, then fix.
 $dryrun = true;
@@ -44,16 +30,8 @@ if ((CLI_SCRIPT && in_array('--fix', $argv ?? [])) ||
     $dryrun = false;
 }
 
-// Get all text/varchar columns from Moodle tables.
-$sql = "SELECT TABLE_NAME, COLUMN_NAME, DATA_TYPE
-        FROM information_schema.COLUMNS
-        WHERE TABLE_SCHEMA = ?
-        AND TABLE_NAME LIKE ?
-        AND DATA_TYPE IN ('varchar', 'char', 'text', 'mediumtext', 'longtext')
-        ORDER BY TABLE_NAME, COLUMN_NAME";
-
 $stmt = $DB->get_recordset_sql(
-    "SELECT TABLE_NAME AS tablename, COLUMN_NAME AS columnname, DATA_TYPE AS datatype
+    "SELECT TABLE_NAME AS tablename, COLUMN_NAME AS columnname
        FROM information_schema.COLUMNS
       WHERE TABLE_SCHEMA = :dbname
         AND TABLE_NAME LIKE :prefix
@@ -63,7 +41,7 @@ $stmt = $DB->get_recordset_sql(
 );
 
 $totalfixed = 0;
-$affectedtables = [];
+$totalrows = 0;
 
 foreach ($stmt as $col) {
     $fulltable = $col->tablename;
@@ -76,7 +54,7 @@ foreach ($stmt as $col) {
         $table = $fulltable;
     }
 
-    // Count rows with the double-encoding marker.
+    // Count affected rows.
     $count = $DB->count_records_sql(
         "SELECT COUNT(*) FROM {{$table}} WHERE {$column} LIKE ?",
         ['%' . $marker . '%']
@@ -86,11 +64,35 @@ foreach ($stmt as $col) {
         continue;
     }
 
-    echo "FOUND: {$table}.{$column} — {$count} rows with broken encoding\n";
-    $affectedtables[$table][] = $column;
+    echo "------------------------------------------------------------\n";
+    echo "TABLE: {$fulltable}.{$column} ({$count} rows)\n";
+    echo "------------------------------------------------------------\n";
+
+    // Show preview: current value vs fixed value (max 5 samples per column).
+    $samples = $DB->get_records_sql(
+        "SELECT id, {$column} AS val,
+                CONVERT(CAST(CONVERT({$column} USING latin1) AS BINARY) USING utf8mb4) AS fixed
+           FROM {{$table}}
+          WHERE {$column} LIKE ?
+          LIMIT 5",
+        ['%' . $marker . '%']
+    );
+
+    foreach ($samples as $row) {
+        $before = mb_substr($row->val, 0, 120);
+        $after = mb_substr($row->fixed, 0, 120);
+        echo "  id={$row->id}\n";
+        echo "    PRZED: {$before}\n";
+        echo "    PO:    {$after}\n\n";
+    }
+
+    if ($count > 5) {
+        echo "  ... i " . ($count - 5) . " wiecej\n\n";
+    }
+
+    $totalrows += $count;
 
     if (!$dryrun) {
-        // Fix the double encoding.
         $DB->execute(
             "UPDATE {{$table}}
                 SET {$column} = CONVERT(CAST(CONVERT({$column} USING latin1) AS BINARY) USING utf8mb4)
@@ -98,27 +100,28 @@ foreach ($stmt as $col) {
             ['%' . $marker . '%']
         );
         $totalfixed += $count;
-        echo "  -> FIXED {$count} rows\n";
+        echo "  -> NAPRAWIONO {$count} rows\n\n";
     }
 }
 
 $stmt->close();
 
-echo "\n=== Summary ===\n";
-echo "Tables affected: " . count($affectedtables) . "\n";
+echo "\n=== Podsumowanie ===\n";
+echo "Znalezionych rekordow do naprawy: {$totalrows}\n";
 
 if ($dryrun) {
-    echo "\nThis was a DRY RUN. No data was changed.\n";
+    echo "\nTo byl DRY RUN — nic nie zostalo zmienione.\n";
+    echo "Przejrzyj powyzsze zmiany PRZED -> PO.\n";
     if (CLI_SCRIPT) {
-        echo "To apply fixes, run: php fix_encoding.php --fix\n";
+        echo "Aby naprawic: php fix_encoding.php --fix\n";
     } else {
         $fixurl = new moodle_url('/fix_encoding.php', ['fix' => '1', 'sesskey' => sesskey()]);
-        echo "\nTo apply fixes: <a href=\"" . $fixurl->out() . "\">CLICK HERE TO FIX</a>\n";
-        echo "(Make sure you have a database backup first!)\n";
+        echo "\nAby naprawic: <a href=\"" . $fixurl->out() . "\">KLIKNIJ TUTAJ ABY NAPRAWIC</a>\n";
+        echo "(Upewnij sie, ze masz backup bazy!)\n";
     }
 } else {
-    echo "Total rows fixed: {$totalfixed}\n";
-    echo "\nDone! Purge Moodle caches now: /admin/purgecaches.php\n";
+    echo "Naprawionych rekordow: {$totalfixed}\n";
+    echo "\nGotowe! Wyczysc cache: /admin/purgecaches.php\n";
 }
 
 if (!CLI_SCRIPT) {
