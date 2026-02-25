@@ -69,7 +69,11 @@ $cols = $DB->get_recordset_sql(
 
 $totalrows = 0;
 $totalfixed = 0;
-$results = [];
+
+// Tables to skip.
+$skiptables = [
+    'local_mail_history',
+];
 
 foreach ($cols as $col) {
     $fulltable = $col->tablename;
@@ -79,6 +83,11 @@ foreach ($cols as $col) {
         $table = substr($fulltable, strlen($prefix));
     } else {
         $table = $fulltable;
+    }
+
+    // Skip excluded tables.
+    if (in_array($table, $skiptables)) {
+        continue;
     }
 
     $where = str_replace('COLUMN_PH', $column, $likeTemplate);
