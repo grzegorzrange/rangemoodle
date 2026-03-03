@@ -52,6 +52,7 @@ class content extends content_base {
         $PAGE->requires->js_call_amd('format_archive/mutations', 'init');
         $PAGE->requires->js_call_amd('format_archive/section', 'init');
         $PAGE->requires->js_call_amd('format_archive/courseindexscroll', 'init');
+        $PAGE->requires->js_call_amd('format_archive/collapsefix', 'init');
         return parent::export_for_template($output);
     }
 

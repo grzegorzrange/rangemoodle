@@ -40,24 +40,25 @@ define([], function() {
         MOBILE_PANEL_ID: 'archive-courseindex-dropdown-panel'
     };
 
+    /** Guard flag to prevent re-entrant MutationObserver callbacks. */
+    var mutationGuard = false;
+
     /**
-     * Replace section title <a> with <span> to make them non-clickable.
+     * Disable section title link navigation by removing href.
+     * Uses non-destructive approach (no DOM replacement) to avoid MutationObserver loops.
+     * Keeps the element as <a> so reactive data-action handlers still work.
      *
      * @param {HTMLElement} container
      */
     var disableSectionLinks = function(container) {
         var links = container.querySelectorAll(SELECTORS.SECTION_TITLE_LINK);
         links.forEach(function(link) {
-            var span = document.createElement('span');
-            for (var i = 0; i < link.attributes.length; i++) {
-                var attr = link.attributes[i];
-                if (attr.name !== 'href') {
-                    span.setAttribute(attr.name, attr.value);
-                }
+            if (link.dataset.archiveDisabled) {
+                return; // Already processed.
             }
-            span.innerHTML = link.innerHTML;
-            span.style.cursor = 'default';
-            link.parentNode.replaceChild(span, link);
+            link.dataset.archiveDisabled = '1';
+            link.removeAttribute('href');
+            link.style.cursor = 'default';
         });
     };
 
@@ -262,15 +263,29 @@ define([], function() {
         });
 
         // Watch for courseindex mutations (reactive updates) and rebuild panel content.
+        var panelRebuildTimer = null;
         var observer = new MutationObserver(function() {
-            var wasOpen = panel.classList.contains('open');
-            // Replace panel content.
-            panel.innerHTML = '';
-            var newContent = cloneCourseindexContent(courseindex);
-            panel.appendChild(newContent);
-            if (wasOpen) {
-                panel.classList.add('open');
+            if (mutationGuard) {
+                return;
             }
+            // Debounce panel rebuild to avoid cascading mutations.
+            if (panelRebuildTimer) {
+                clearTimeout(panelRebuildTimer);
+            }
+            panelRebuildTimer = setTimeout(function() {
+                panelRebuildTimer = null;
+                mutationGuard = true;
+                var wasOpen = panel.classList.contains('open');
+                panel.innerHTML = '';
+                var newContent = cloneCourseindexContent(courseindex);
+                panel.appendChild(newContent);
+                if (wasOpen) {
+                    panel.classList.add('open');
+                }
+                Promise.resolve().then(function() {
+                    mutationGuard = false;
+                });
+            }, 100);
         });
         observer.observe(courseindex, {childList: true, subtree: true, characterData: true});
     };
@@ -317,9 +332,17 @@ define([], function() {
                     // 3. Set up mobile dropdown.
                     setupMobileDropdown(drawer);
 
-                    // Re-disable section links after reactive updates.
+                    // Re-disable section links after reactive updates (with guard).
                     var sectionObserver = new MutationObserver(function() {
+                        if (mutationGuard) {
+                            return;
+                        }
+                        mutationGuard = true;
                         disableSectionLinks(drawer);
+                        // Release guard after microtask to allow batched mutations to settle.
+                        Promise.resolve().then(function() {
+                            mutationGuard = false;
+                        });
                     });
                     sectionObserver.observe(courseindex, {childList: true, subtree: true});
                 } else {
