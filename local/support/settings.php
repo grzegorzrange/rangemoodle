@@ -58,5 +58,28 @@ if ($hassiteconfig) {
         PARAM_ALPHANUMEXT
     ));
 
+    // WordPress sync settings.
+    $settings->add(new admin_setting_heading(
+        'local_support/wp_sync_heading',
+        get_string('wp_sync_heading', 'local_support'),
+        get_string('wp_sync_heading_desc', 'local_support')
+    ));
+
+    $settings->add(new admin_setting_configtext(
+        'local_support/wp_sync_endpoint',
+        get_string('wp_sync_endpoint', 'local_support'),
+        get_string('wp_sync_endpoint_desc', 'local_support'),
+        '',
+        PARAM_URL
+    ));
+
+    $settings->add(new admin_setting_configtext(
+        'local_support/wp_sync_token',
+        get_string('wp_sync_token', 'local_support'),
+        get_string('wp_sync_token_desc', 'local_support'),
+        '',
+        PARAM_RAW_TRIMMED
+    ));
+
     $ADMIN->add('localplugins', $settings);
 }

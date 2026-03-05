@@ -96,6 +96,14 @@ if ($setdeclaration && confirm_sesskey()) {
                 'timenotified' => $now,
             ]);
         }
+
+        // Send user data to WordPress.
+        if (class_exists('\local_support\wp_sync_service')) {
+            if (!isset($user)) {
+                $user = $DB->get_record('user', ['id' => $record->userid], '*', MUST_EXIST);
+            }
+            \local_support\wp_sync_service::send($user, 'declaration_set');
+        }
     }
 
     redirect($pageurl, get_string('declarationset', 'local_recruitment'), null,
@@ -120,7 +128,7 @@ echo html_writer::link($importurl, get_string('importusers', 'local_recruitment'
     'class' => 'btn btn-primary mr-2',
 ]);
 echo html_writer::link($exporturl, get_string('exportusers', 'local_recruitment'), [
-    'class' => 'btn btn-outline-primary mr-2',
+    'class' => 'btn btn-primary mr-2',
 ]);
 echo html_writer::link($backurl, get_string('backtousers', 'local_recruitment'), [
     'class' => 'btn btn-secondary',
