@@ -36,9 +36,11 @@ $content = \local_recruitment\recruitment::export_users_csv($did);
 
 $filename = clean_filename($recruitment->name . '_' . $direction->name . '_users.csv');
 
+$bom = "\xEF\xBB\xBF";
 header('Content-Type: text/csv; charset=utf-8');
 header('Content-Disposition: attachment; filename="' . $filename . '"');
-header('Content-Length: ' . strlen($content));
+header('Content-Length: ' . (strlen($bom) + strlen($content)));
 
+echo $bom;
 echo $content;
 exit;

@@ -431,9 +431,26 @@ class recruitment {
             return $result;
         }
 
-        // Check if first line is a header.
+        // Detect header row and build column map.
+        // Default column order: username;firstname;lastname;email;declaration
+        $colmap = ['username' => 0, 'firstname' => 1, 'lastname' => 2, 'email' => 3, 'declaration' => 4];
+        $mincols = 5;
+
         $firstline = strtolower(trim($lines[0]));
         if (strpos($firstline, 'username') !== false) {
+            $headerparts = str_getcsv($firstline, ';');
+            $headerparts = array_map('trim', $headerparts);
+            $detected = [];
+            foreach ($headerparts as $idx => $col) {
+                $detected[$col] = $idx;
+            }
+            // Map known columns by name.
+            foreach (['username', 'firstname', 'lastname', 'email', 'declaration'] as $key) {
+                if (isset($detected[$key])) {
+                    $colmap[$key] = $detected[$key];
+                }
+            }
+            $mincols = max($colmap) + 1;
             array_shift($lines);
         }
 
@@ -446,19 +463,19 @@ class recruitment {
             $csvline = $linenum + 2; // +2 because 1-based + header.
             $parts = str_getcsv($line, ';');
 
-            if (count($parts) < 5) {
+            if (count($parts) < $mincols) {
                 $a = new \stdClass();
                 $a->line = $csvline;
-                $a->message = 'Not enough columns (expected 5, got ' . count($parts) . ')';
+                $a->message = 'Not enough columns (expected ' . $mincols . ', got ' . count($parts) . ')';
                 $result['errors'][] = get_string('importerror', 'local_recruitment', $a);
                 continue;
             }
 
-            $username = trim($parts[0]);
-            $firstname = trim($parts[1]);
-            $lastname = trim($parts[2]);
-            $email = trim($parts[3]);
-            $declarationstr = strtolower(trim($parts[4]));
+            $username = trim($parts[$colmap['username']]);
+            $firstname = trim($parts[$colmap['firstname']]);
+            $lastname = trim($parts[$colmap['lastname']]);
+            $email = trim($parts[$colmap['email']]);
+            $declarationstr = strtolower(trim($parts[$colmap['declaration']]));
 
             if (empty($username) || empty($firstname) || empty($lastname)) {
                 $a = new \stdClass();
