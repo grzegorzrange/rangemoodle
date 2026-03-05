@@ -60,16 +60,25 @@ class wp_sync_service {
             'email'     => $email,
         ];
 
-        $body = json_encode($data);
+        $body = json_encode($data, JSON_UNESCAPED_UNICODE);
         $signature = hash_hmac('sha256', $body, $secret);
 
         $curl = new \curl();
+
         $curl->setHeader([
             'Content-Type: application/json',
             'X-Signature: ' . $signature,
         ]);
-        $response = $curl->post($endpoint, $body);
-        $httpcode = $curl->get_info()['http_code'] ?? 0;
+
+        $options = [
+            'CURLOPT_CONNECTTIMEOUT' => 5,   // max czas na nawiązanie połączenia
+            'CURLOPT_TIMEOUT' => 10,         // max czas całego requestu
+            'CURLOPT_RETURNTRANSFER' => true
+        ];
+
+        $response = $curl->post($endpoint, $body, $options);
+        $info = $curl->get_info();
+        $httpcode = $info['http_code'] ?? 0;
 
         $success = ($httpcode >= 200 && $httpcode < 300);
 
