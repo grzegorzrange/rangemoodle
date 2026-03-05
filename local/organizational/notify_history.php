@@ -37,10 +37,10 @@ $returnurl = new moodle_url('/local/organizational/index.php');
 
 $PAGE->set_url($pageurl);
 $PAGE->set_title(get_string('notifyhistory', 'local_organizational'));
-$PAGE->set_heading(get_string('notifyhistoryfor', 'local_organizational', $organizational->name));
+$PAGE->set_heading(get_string('notifyhistoryfor', 'local_organizational', format_string($organizational->name)));
 
 echo $OUTPUT->header();
-echo $OUTPUT->heading(get_string('notifyhistoryfor', 'local_organizational', $organizational->name));
+echo $OUTPUT->heading(get_string('notifyhistoryfor', 'local_organizational', format_string($organizational->name)));
 
 $table = new flexible_table('local-organizational-notify-history');
 $table->define_columns(['timecreated', 'sentby', 'recipientcount']);

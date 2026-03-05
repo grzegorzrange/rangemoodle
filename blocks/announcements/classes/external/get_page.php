@@ -64,8 +64,19 @@ class get_page extends external_api {
             'page' => $page,
         ]);
 
+        global $USER, $DB;
+
         $context = \context_system::instance();
         self::validate_context($context);
+
+        // Check that the user has access to this direction (admin or cohort member).
+        if (!is_siteadmin()) {
+            $direction = $DB->get_record('local_recruitment_course', ['id' => $params['directionid']]);
+            if (!$direction || !$direction->cohortid ||
+                    !$DB->record_exists('cohort_members', ['cohortid' => $direction->cohortid, 'userid' => $USER->id])) {
+                throw new \moodle_exception('nopermissions', 'error', '', 'view announcements');
+            }
+        }
 
         $perpage = 3;
         $result = \local_dashboard\announcement::get_for_direction($params['directionid'], $params['page'], $perpage);

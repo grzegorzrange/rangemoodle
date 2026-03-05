@@ -46,8 +46,8 @@ if (!is_siteadmin()) {
     }
 }
 
-$PAGE->set_title($record->name);
-$PAGE->set_heading($record->name);
+$PAGE->set_title(format_string($record->name));
+$PAGE->set_heading(format_string($record->name));
 
 echo $OUTPUT->header();
 echo $OUTPUT->heading(format_string($record->name));

@@ -37,10 +37,10 @@ $returnurl = new moodle_url('/local/schedule/index.php');
 
 $PAGE->set_url($pageurl);
 $PAGE->set_title(get_string('notifyhistory', 'local_schedule'));
-$PAGE->set_heading(get_string('notifyhistoryfor', 'local_schedule', $schedule->name));
+$PAGE->set_heading(get_string('notifyhistoryfor', 'local_schedule', format_string($schedule->name)));
 
 echo $OUTPUT->header();
-echo $OUTPUT->heading(get_string('notifyhistoryfor', 'local_schedule', $schedule->name));
+echo $OUTPUT->heading(get_string('notifyhistoryfor', 'local_schedule', format_string($schedule->name)));
 
 // Build table.
 $table = new flexible_table('local-schedule-notify-history');

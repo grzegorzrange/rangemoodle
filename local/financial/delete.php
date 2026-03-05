@@ -61,7 +61,7 @@ $confirmurl = new moodle_url('/local/financial/delete.php', [
 ]);
 
 echo $OUTPUT->confirm(
-    get_string('confirmdeletefinancial', 'local_financial', $record->name),
+    get_string('confirmdeletefinancial', 'local_financial', format_string($record->name)),
     $confirmurl,
     $returnurl
 );

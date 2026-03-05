@@ -649,7 +649,7 @@ class recruitment {
             $notified = $rec->notified ? 'tak' : 'nie';
             $timenotified = $rec->timenotified ? userdate($rec->timenotified, '%Y-%m-%d %H:%M') : '';
 
-            $lines[] = implode(';', [
+            $lines[] = implode(';', array_map([self::class, 'csv_safe'], [
                 $rec->username,
                 $rec->firstname,
                 $rec->lastname,
@@ -658,10 +658,28 @@ class recruitment {
                 $declaration,
                 $notified,
                 $timenotified,
-            ]);
+            ]));
         }
 
         return implode("\n", $lines) . "\n";
+    }
+
+    /**
+     * Sanitize a CSV field to prevent CSV injection (formula injection).
+     *
+     * @param string $value
+     * @return string
+     */
+    private static function csv_safe(string $value): string {
+        // If value starts with =, +, -, @, tab, or CR, prefix with a single quote.
+        if ($value !== '' && in_array($value[0], ['=', '+', '-', '@', "\t", "\r"])) {
+            $value = "'" . $value;
+        }
+        // If value contains the separator or quotes, wrap in quotes and escape existing quotes.
+        if (strpos($value, ';') !== false || strpos($value, '"') !== false || strpos($value, "\n") !== false) {
+            $value = '"' . str_replace('"', '""', $value) . '"';
+        }
+        return $value;
     }
 
     /**

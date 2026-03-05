@@ -60,7 +60,7 @@ $confirmurl = new moodle_url('/local/recruitment/delete.php', [
 ]);
 
 echo $OUTPUT->confirm(
-    get_string('confirmdelete', 'local_recruitment', $record->name),
+    get_string('confirmdelete', 'local_recruitment', format_string($record->name)),
     $confirmurl,
     $returnurl
 );

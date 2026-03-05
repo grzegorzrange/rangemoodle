@@ -62,7 +62,7 @@ $confirmurl = new moodle_url('/local/schedule/delete.php', [
 ]);
 
 echo $OUTPUT->confirm(
-    get_string('confirmdeleteschedule', 'local_schedule', $record->name),
+    get_string('confirmdeleteschedule', 'local_schedule', format_string($record->name)),
     $confirmurl,
     $returnurl
 );

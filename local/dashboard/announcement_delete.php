@@ -62,7 +62,7 @@ $confirmurl = new moodle_url('/local/dashboard/announcement_delete.php', [
 ]);
 
 echo $OUTPUT->confirm(
-    get_string('confirmdeleteannouncement', 'local_dashboard', $record->name),
+    get_string('confirmdeleteannouncement', 'local_dashboard', format_string($record->name)),
     $confirmurl,
     $returnurl
 );
