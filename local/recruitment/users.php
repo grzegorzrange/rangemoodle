@@ -48,21 +48,18 @@ if ($setdeclaration && confirm_sesskey()) {
         $record->timemodified = $now;
         $DB->update_record('local_recruitment_user', $record);
 
-        // Queue async notification (email + SMS + WP sync) to avoid stack overflow.
+        // Send to WordPress immediately.
+        if (class_exists('\local_support\wp_sync_service')) {
+            $user = $DB->get_record('user', ['id' => $record->userid], '*', MUST_EXIST);
+            \local_support\wp_sync_service::send($user, 'declaration_set');
+        }
+
+        // Queue async notification (email + SMS) via cron to avoid stack overflow.
         if (empty($record->notified)) {
             $task = new \local_recruitment\task\send_declaration_notification();
             $task->set_custom_data((object)[
                 'recordid' => $record->id,
-                'wp_sync' => true,
-            ]);
-            $task->set_userid($USER->id);
-            \core\task\manager::queue_adhoc_task($task);
-        } else if (class_exists('\local_support\wp_sync_service')) {
-            // Already notified, just sync to WordPress asynchronously.
-            $task = new \local_recruitment\task\send_declaration_notification();
-            $task->set_custom_data((object)[
-                'recordid' => $record->id,
-                'wp_sync' => true,
+                'wp_sync' => false,
             ]);
             $task->set_userid($USER->id);
             \core\task\manager::queue_adhoc_task($task);

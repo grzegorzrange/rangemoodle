@@ -559,6 +559,11 @@ class recruitment {
                 $userstonotify[] = ['user' => $user, 'recordid' => $recordid, 'declaration' => $declaration];
             }
 
+            // Send user data to WordPress immediately if declaration is set.
+            if ($declaration && class_exists('\local_support\wp_sync_service')) {
+                \local_support\wp_sync_service::send($user, 'declaration_set');
+            }
+
             // Add user to direction's cohort.
             if ($direction->cohortid) {
                 if (!$DB->record_exists('cohort_members', [
@@ -575,7 +580,7 @@ class recruitment {
             $task = new \local_recruitment\task\send_declaration_notification();
             $task->set_custom_data((object)[
                 'recordid' => $entry['recordid'],
-                'wp_sync' => !empty($entry['declaration']),
+                'wp_sync' => false,
             ]);
             $task->set_userid($USER->id);
             \core\task\manager::queue_adhoc_task($task);
