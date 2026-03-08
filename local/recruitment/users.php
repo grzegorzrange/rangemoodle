@@ -48,61 +48,24 @@ if ($setdeclaration && confirm_sesskey()) {
         $record->timemodified = $now;
         $DB->update_record('local_recruitment_user', $record);
 
-        // Send email + SMS notification if not yet notified.
+        // Queue async notification (email + SMS + WP sync) to avoid stack overflow.
         if (empty($record->notified)) {
-            $user = $DB->get_record('user', ['id' => $record->userid], '*', MUST_EXIST);
-            $noreplyuser = \core_user::get_noreply_user();
-
-            $subject = get_string('examregistrationsubject', 'local_recruitment');
-            $messagetext = get_string('examregistrationbody', 'local_recruitment', (object)[
-                'direction' => $direction->name,
-                'recruitment' => $recruitment->name,
+            $task = new \local_recruitment\task\send_declaration_notification();
+            $task->set_custom_data((object)[
+                'recordid' => $record->id,
+                'wp_sync' => true,
             ]);
-            $smstext = get_string('examregistrationsms', 'local_recruitment', (object)[
-                'direction' => $direction->name,
-                'recruitment' => $recruitment->name,
+            $task->set_userid($USER->id);
+            \core\task\manager::queue_adhoc_task($task);
+        } else if (class_exists('\local_support\wp_sync_service')) {
+            // Already notified, just sync to WordPress asynchronously.
+            $task = new \local_recruitment\task\send_declaration_notification();
+            $task->set_custom_data((object)[
+                'recordid' => $record->id,
+                'wp_sync' => true,
             ]);
-
-            // Send Moodle message (email).
-            $message = new \core\message\message();
-            $message->component = 'local_recruitment';
-            $message->name = 'exam_registration';
-            $message->userfrom = $noreplyuser;
-            $message->userto = $user;
-            $message->subject = $subject;
-            $message->fullmessage = $messagetext;
-            $message->fullmessageformat = FORMAT_PLAIN;
-            $message->fullmessagehtml = nl2br(s($messagetext));
-            $message->smallmessage = $subject;
-            $message->notification = 1;
-
-            try {
-                message_send($message);
-            } catch (\Exception $e) {
-                debugging('Failed to send email to user ' . $user->id . ': ' . $e->getMessage(), DEBUG_NORMAL);
-            }
-
-            // Send SMS.
-            if (class_exists('\local_support\sms_service') && !empty($user->phone1)) {
-                \local_support\sms_service::send(
-                    $user, $smstext, 'local_recruitment', 'exam_registration_sms', (int)$direction->id
-                );
-            }
-
-            // Mark as notified.
-            $DB->update_record('local_recruitment_user', (object)[
-                'id' => $record->id,
-                'notified' => 1,
-                'timenotified' => $now,
-            ]);
-        }
-
-        // Send user data to WordPress.
-        if (class_exists('\local_support\wp_sync_service')) {
-            if (!isset($user)) {
-                $user = $DB->get_record('user', ['id' => $record->userid], '*', MUST_EXIST);
-            }
-            \local_support\wp_sync_service::send($user, 'declaration_set');
+            $task->set_userid($USER->id);
+            \core\task\manager::queue_adhoc_task($task);
         }
     }
 

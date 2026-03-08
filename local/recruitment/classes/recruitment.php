@@ -540,7 +540,7 @@ class recruitment {
 
                 // Only notify if not yet notified for this direction.
                 if (empty($existing->notified)) {
-                    $userstonotify[] = ['user' => $user, 'recordid' => $existing->id];
+                    $userstonotify[] = ['user' => $user, 'recordid' => $existing->id, 'declaration' => $declaration];
                 }
             } else {
                 $record = new \stdClass();
@@ -556,12 +556,7 @@ class recruitment {
                 $recordid = $DB->insert_record('local_recruitment_user', $record);
                 $result['created']++;
 
-                $userstonotify[] = ['user' => $user, 'recordid' => $recordid];
-            }
-
-            // Send user data to WordPress if declaration is set.
-            if ($declaration && class_exists('\local_support\wp_sync_service')) {
-                \local_support\wp_sync_service::send($user, 'declaration_set');
+                $userstonotify[] = ['user' => $user, 'recordid' => $recordid, 'declaration' => $declaration];
             }
 
             // Add user to direction's cohort.
@@ -575,85 +570,19 @@ class recruitment {
             }
         }
 
-        // Send notifications to all newly imported (not yet notified) users.
-        $notifiedcount = self::send_import_notifications($userstonotify, $direction, $recruitment);
-        $result['notified'] = $notifiedcount;
+        // Queue async notifications for all newly imported (not yet notified) users.
+        foreach ($userstonotify as $entry) {
+            $task = new \local_recruitment\task\send_declaration_notification();
+            $task->set_custom_data((object)[
+                'recordid' => $entry['recordid'],
+                'wp_sync' => !empty($entry['declaration']),
+            ]);
+            $task->set_userid($USER->id);
+            \core\task\manager::queue_adhoc_task($task);
+        }
+        $result['notified'] = count($userstonotify);
 
         return $result;
-    }
-
-    /**
-     * Send email + SMS notifications to imported users.
-     *
-     * @param array $userstonotify Array of ['user' => user object, 'recordid' => int].
-     * @param \stdClass $direction Direction record.
-     * @param \stdClass $recruitment Recruitment record.
-     * @return int Number of users notified.
-     */
-    protected static function send_import_notifications(array $userstonotify, \stdClass $direction, \stdClass $recruitment): int {
-        global $DB, $CFG;
-
-        if (empty($userstonotify)) {
-            return 0;
-        }
-
-        $count = 0;
-        $now = time();
-        $noreplyuser = \core_user::get_noreply_user();
-
-        $subject = get_string('examregistrationsubject', 'local_recruitment');
-        $messagetext = get_string('examregistrationbody', 'local_recruitment', (object)[
-            'direction' => $direction->name,
-            'recruitment' => $recruitment->name,
-        ]);
-        $smstext = get_string('examregistrationsms', 'local_recruitment', (object)[
-            'direction' => $direction->name,
-            'recruitment' => $recruitment->name,
-        ]);
-
-        foreach ($userstonotify as $entry) {
-            $user = $entry['user'];
-            $recordid = $entry['recordid'];
-
-            // Send Moodle message (email).
-            $message = new \core\message\message();
-            $message->component = 'local_recruitment';
-            $message->name = 'exam_registration';
-            $message->userfrom = $noreplyuser;
-            $message->userto = $user;
-            $message->subject = $subject;
-            $message->fullmessage = $messagetext;
-            $message->fullmessageformat = FORMAT_PLAIN;
-            $message->fullmessagehtml = nl2br(s($messagetext));
-            $message->smallmessage = $subject;
-            $message->notification = 1;
-
-            try {
-                message_send($message);
-            } catch (\Exception $e) {
-                debugging('Failed to send email to user ' . $user->id . ': ' . $e->getMessage(), DEBUG_NORMAL);
-            }
-
-            // Send SMS via local_support sms_service.
-            if (class_exists('\local_support\sms_service')) {
-                // Ensure user has phone1 loaded.
-                $fulluser = $DB->get_record('user', ['id' => $user->id]);
-                if ($fulluser && !empty($fulluser->phone1)) {
-                    \local_support\sms_service::send($fulluser, $smstext, 'local_recruitment', 'exam_registration_sms', (int)$direction->id);
-                }
-            }
-
-            // Mark as notified.
-            $DB->update_record('local_recruitment_user', (object)[
-                'id' => $recordid,
-                'notified' => 1,
-                'timenotified' => $now,
-            ]);
-
-            $count++;
-        }
-
-        return $count;
     }
 
     /**
