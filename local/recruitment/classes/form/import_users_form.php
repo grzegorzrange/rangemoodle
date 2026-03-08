@@ -64,9 +64,18 @@ class import_users_form extends \moodleform {
     public function validation($data, $files) {
         $errors = parent::validation($data, $files);
 
-        $filename = $this->get_new_filename('csvfile');
-        if ($filename && !preg_match('/\.csv$/i', $filename)) {
-            $errors['csvfile'] = get_string('csvfileonly', 'local_recruitment');
+        // Check file extension directly from draft area (not via get_new_filename which triggers recursion).
+        if (!empty($data['csvfile'])) {
+            $fs = get_file_storage();
+            $context = \context_user::instance($GLOBALS['USER']->id);
+            $draftfiles = $fs->get_area_files($context->id, 'user', 'draft', $data['csvfile'], 'id DESC', false);
+            if (!empty($draftfiles)) {
+                $file = reset($draftfiles);
+                $filename = $file->get_filename();
+                if (!preg_match('/\.csv$/i', $filename)) {
+                    $errors['csvfile'] = get_string('csvfileonly', 'local_recruitment');
+                }
+            }
         }
 
         return $errors;
