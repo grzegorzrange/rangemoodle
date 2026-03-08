@@ -34,3 +34,42 @@ $string['filter_dateto'] = 'Data do';
 $string['filter'] = 'Filtruj';
 $string['resetfilters'] = 'Resetuj';
 $string['privacy:metadata'] = 'Wtyczka Raport logów nie przechowuje żadnych danych osobowych. Odczytuje jedynie istniejące dane z logów.';
+
+// Generic Polish event description templates.
+$string['eventdesc_generic'] = 'Użytkownik {$a->user} wykonał akcję „{$a->action}" na obiekcie „{$a->target}" (komponent: {$a->component}).';
+$string['eventdesc_generic_course'] = 'Użytkownik {$a->user} wykonał akcję „{$a->action}" na obiekcie „{$a->target}" w kursie „{$a->course}" (komponent: {$a->component}).';
+$string['eventdesc_generic_module'] = 'Użytkownik {$a->user} wykonał akcję „{$a->action}" na module „{$a->module}" w kursie „{$a->course}" (komponent: {$a->component}).';
+$string['eventdesc_questions_imported'] = 'Użytkownik {$a->user} zaimportował pytania do bazy pytań.';
+
+// CRUD action translations.
+$string['crud_c'] = 'utworzył';
+$string['crud_r'] = 'wyświetlił';
+$string['crud_u'] = 'zaktualizował';
+$string['crud_d'] = 'usunął';
+
+// Common event descriptions for local plugins.
+$string['eventdesc_created'] = 'Użytkownik {$a->user} utworzył {$a->target} (komponent: {$a->component}).';
+$string['eventdesc_updated'] = 'Użytkownik {$a->user} zaktualizował {$a->target} (komponent: {$a->component}).';
+$string['eventdesc_deleted'] = 'Użytkownik {$a->user} usunął {$a->target} (komponent: {$a->component}).';
+$string['eventdesc_viewed'] = 'Użytkownik {$a->user} wyświetlił {$a->target} (komponent: {$a->component}).';
+
+// Component name translations.
+$string['component_local_recruitment'] = 'Rekrutacje';
+$string['component_local_dashboard'] = 'Pulpit / Ogłoszenia';
+$string['component_local_financial'] = 'Sprawy finansowe';
+$string['component_local_organizational'] = 'Sprawy organizacyjne';
+$string['component_local_schedule'] = 'Harmonogram';
+$string['component_core'] = 'System';
+
+// Target translations.
+$string['target_recruitment'] = 'rekrutację';
+$string['target_announcement'] = 'ogłoszenie';
+$string['target_financial'] = 'sprawę finansową';
+$string['target_organizational'] = 'sprawę organizacyjną';
+$string['target_schedule'] = 'harmonogram';
+$string['target_course'] = 'kurs';
+$string['target_user'] = 'użytkownika';
+$string['target_role'] = 'rolę';
+$string['target_category'] = 'kategorię';
+$string['target_cohort'] = 'kohortę';
+$string['target_questions'] = 'pytania';

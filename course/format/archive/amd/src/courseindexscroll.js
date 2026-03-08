@@ -76,10 +76,27 @@ define([], function() {
         if (!targetItem) {
             return;
         }
+
+        // Check if the target is inside a collapsed section and expand it.
+        var collapseContainer = targetItem.closest('[id^="coursecontentcollapseid"]');
+        if (collapseContainer && !collapseContainer.classList.contains('show')) {
+            collapseContainer.classList.add('show');
+            // Update the section toggler to reflect expanded state.
+            var sectionNum = collapseContainer.id.replace('coursecontentcollapseid', '');
+            var toggler = document.getElementById('collapsesectionid' + sectionNum);
+            if (toggler) {
+                toggler.classList.remove('collapsed');
+                toggler.setAttribute('aria-expanded', 'true');
+            }
+        }
+
         var targetLink = targetItem.querySelector(SELECTORS.ACTIVITY_NAME);
         var scrollTarget = targetLink || targetItem;
 
-        scrollTarget.scrollIntoView({behavior: 'smooth', block: 'center'});
+        // Small delay to let the section expand render before scrolling.
+        setTimeout(function() {
+            scrollTarget.scrollIntoView({behavior: 'smooth', block: 'center'});
+        }, 50);
 
         targetItem.style.transition = 'background-color 0.3s ease';
         targetItem.style.backgroundColor = '#fff3cd';

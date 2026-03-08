@@ -60,13 +60,19 @@ class organizational_form extends \moodleform {
         $mform->setType('message_editor', PARAM_RAW);
         $mform->addRule('message_editor', get_string('required'), 'required', null, 'client');
 
-        // Direction (required).
-        $directions = $DB->get_records_sql(
-            'SELECT rc.id, ' . $DB->sql_concat('r.name', "' → '", 'rc.name') . ' AS fullname
-               FROM {local_recruitment_course} rc
-               JOIN {local_recruitment} r ON r.id = rc.recruitmentid
-              ORDER BY r.name, rc.name'
-        );
+        // Direction (required) — only show directions that don't have an organizational record yet.
+        $editid = isset($this->_customdata['editid']) ? (int)$this->_customdata['editid'] : 0;
+        $sql = 'SELECT rc.id, ' . $DB->sql_concat('r.name', "' → '", 'rc.name') . ' AS fullname
+                  FROM {local_recruitment_course} rc
+                  JOIN {local_recruitment} r ON r.id = rc.recruitmentid
+                 WHERE NOT EXISTS (
+                       SELECT 1 FROM {local_organizational} o
+                        WHERE o.directionid = rc.id' .
+                       ($editid ? ' AND o.id <> :editid' : '') . '
+                 )
+              ORDER BY r.name, rc.name';
+        $params = $editid ? ['editid' => $editid] : [];
+        $directions = $DB->get_records_sql($sql, $params);
         $options = [];
         foreach ($directions as $d) {
             $options[$d->id] = format_string($d->fullname);

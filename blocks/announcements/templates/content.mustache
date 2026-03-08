@@ -30,6 +30,11 @@
             <div class="card h-100 announcement-tile">
                 <div class="card-body d-flex flex-column">
                     <h5 class="card-title">{{name}}</h5>
+                    {{#isadmin}}
+                    {{#directionname}}
+                    <span class="badge badge-info bg-info mb-1">{{directionname}}</span>
+                    {{/directionname}}
+                    {{/isadmin}}
                     <p class="card-text text-muted small fst-italic mb-1">{{date}}</p>
                     <p class="card-text flex-grow-1">{{text}}</p>
                     {{#hasattachments}}

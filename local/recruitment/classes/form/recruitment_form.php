@@ -48,11 +48,43 @@ class recruitment_form extends \moodleform {
         $mform->setType('name', PARAM_TEXT);
         $mform->addRule('name', get_string('required'), 'required', null, 'client');
 
-        // Recruitment date.
-        $mform->addElement('date_selector', 'recruitmentdate', get_string('recruitmentdate', 'local_recruitment'));
-        $mform->addRule('recruitmentdate', get_string('required'), 'required', null, 'client');
+        // Recruitment end date (month/year only).
+        $months = [];
+        for ($m = 1; $m <= 12; $m++) {
+            $months[$m] = userdate(mktime(0, 0, 0, $m, 1, 2000), '%B');
+        }
+        $currentyear = (int)date('Y');
+        $years = [];
+        for ($y = $currentyear; $y <= $currentyear + 10; $y++) {
+            $years[$y] = $y;
+        }
+        $dategroup = [];
+        $dategroup[] = $mform->createElement('select', 'recruitmentmonth', '', $months);
+        $dategroup[] = $mform->createElement('select', 'recruitmentyear', '', $years);
+        $mform->addGroup($dategroup, 'recruitmentdategroup', get_string('recruitmentdate', 'local_recruitment'), ' ', false);
+        $mform->addGroupRule('recruitmentdategroup', [
+            'recruitmentmonth' => [[get_string('required'), 'required', null, 'client']],
+            'recruitmentyear' => [[get_string('required'), 'required', null, 'client']],
+        ]);
 
         $this->add_action_buttons();
+    }
+
+    /**
+     * Set form data — convert recruitmentdate timestamp to month/year selects.
+     *
+     * @param \stdClass|array $data
+     */
+    public function set_data($data) {
+        $data = (object)$data;
+        if (!empty($data->recruitmentdate)) {
+            $data->recruitmentmonth = (int)date('n', $data->recruitmentdate);
+            $data->recruitmentyear = (int)date('Y', $data->recruitmentdate);
+        } else {
+            $data->recruitmentmonth = (int)date('n');
+            $data->recruitmentyear = (int)date('Y');
+        }
+        parent::set_data($data);
     }
 
     /**

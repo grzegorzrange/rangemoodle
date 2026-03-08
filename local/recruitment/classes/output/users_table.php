@@ -48,12 +48,13 @@ class users_table extends \table_sql {
         $this->directionid = $directionid;
         $this->baseurl = $url;
 
-        $columns = ['username', 'firstname', 'lastname', 'email', 'declaration', 'notified', 'actions'];
+        $columns = ['username', 'firstname', 'lastname', 'email', 'phone1', 'declaration', 'notified', 'actions'];
         $headers = [
             get_string('username'),
             get_string('firstname'),
             get_string('lastname'),
             get_string('email'),
+            get_string('phone'),
             get_string('declaration', 'local_recruitment'),
             get_string('notificationstatus', 'local_recruitment'),
             get_string('actions'),
@@ -69,7 +70,7 @@ class users_table extends \table_sql {
 
         $this->set_sql(
             'ru.id, ru.declaration, ru.notified, ru.timenotified, ru.userid, ru.directionid,
-             u.username, u.firstname, u.lastname, u.email',
+             u.username, u.firstname, u.lastname, u.email, u.phone1',
             '{local_recruitment_user} ru
              JOIN {user} u ON u.id = ru.userid',
             'ru.directionid = :directionid',

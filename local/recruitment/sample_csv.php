@@ -27,9 +27,9 @@ require_once(__DIR__ . '/../../config.php');
 require_login();
 require_capability('local/recruitment:manage', context_system::instance());
 
-$content = "username;firstname;lastname;email;declaration\n";
-$content .= "12345678901;Jan;Kowalski;jan@example.com;tak\n";
-$content .= "98765432109;Anna;Nowak;anna@example.com;nie\n";
+$content = "username;firstname;lastname;email;phone;declaration\n";
+$content .= "12345678901;Jan;Kowalski;jan@example.com;500600700;tak\n";
+$content .= "98765432109;Anna;Nowak;anna@example.com;600700800;nie\n";
 
 header('Content-Type: text/csv; charset=utf-8');
 header('Content-Disposition: attachment; filename="sample_import.csv"');

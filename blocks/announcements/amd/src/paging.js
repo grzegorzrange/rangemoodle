@@ -40,7 +40,7 @@ define(['core/ajax', 'core/templates'], function(Ajax, Templates) {
 
         request[0].then(function(response) {
             var tiles = response.tiles.map(function(tile) {
-                return {
+                var t = {
                     name: tile.name,
                     text: tile.text,
                     date: tile.date,
@@ -48,6 +48,11 @@ define(['core/ajax', 'core/templates'], function(Ajax, Templates) {
                     hasattachments: tile.hasattachments,
                     viewurl: tile.viewurl,
                 };
+                if (tile.isadmin) {
+                    t.isadmin = true;
+                    t.directionname = tile.directionname || '';
+                }
+                return t;
             });
 
             var pages = [];

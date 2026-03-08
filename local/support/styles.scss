@@ -2,11 +2,11 @@ body {
   font-family: 'Lato', sans-serif;
 }
 
-//@media (min-width: 769px) {
-//  #page {
-//    padding-left: 260px !important;
-//  }
-//}
+@media (max-width: 768px) {
+  #user-menu-toggle .userbutton{
+    display: none !important;
+  }
+}
 
 #topofscroll{
   max-width: 100% !important;
@@ -255,6 +255,7 @@ div[role="main"]
   }
 }
 
+#page-local-dashboard-announcement_view,
 #page-local-dashboard-mydata{
   div[role="main"]{
     h2{
@@ -263,6 +264,7 @@ div[role="main"]
   }
 }
 
+#page-local-dashboard-announcement_view,
 #page-local-dashboard-mydata,
 #page-local-financial-view,
 #page-local-organizational-view,
@@ -367,4 +369,76 @@ div[role="main"]
 
 div[data-region="footer-container-popover"]{
   display: none !important;
+}
+
+.archive.section-list{
+  #collapsesections{
+    margin-top: -53px;
+  }
+}
+
+.archive-ci-dropdown-wrapper{
+  margin-bottom: 18px;
+}
+
+.detail-pair,
+.category-bulk-actions.bulk-actions{
+.pair-value{
+  .d-flex{
+    flex-direction: column;
+    input[type="submit"]{
+      margin-top: 4px;
+      max-width: 125px;
+    }
+  }
+}
+}
+
+#page-footer{
+  display: none !important;
+}
+
+.listitem-category{
+  .text-muted.idnumber{
+    display: none !important;
+  }
+}
+
+// Responsive horizontal scroll for tables on small devices.
+@media (max-width: 768px) {
+  .flexible-wrap,
+  .no-overflow {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .generaltable {
+    min-width: 600px;
+  }
+}
+
+@media (max-width: 768px) {
+  #page-header {
+    .align-items-center {
+      flex-direction: column;
+
+      .header-action.ms-2 {
+        margin-left: 0 !important;
+
+        .simplesearchform {
+          justify-content: left !important;
+          margin-left: 0px;
+        }
+      }
+
+      form {
+        padding-left: 0;
+        width: 100%;
+      }
+
+      .header-actions-container {
+        margin-left: 0 !important;
+        width: 100%;
+      }
+    }
+  }
 }

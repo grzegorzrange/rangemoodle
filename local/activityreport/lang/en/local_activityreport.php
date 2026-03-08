@@ -41,3 +41,23 @@ $string['filter_description'] = 'Description';
 $string['filter_datefrom'] = 'Date from';
 $string['filter_dateto'] = 'Date to';
 $string['privacy:metadata'] = 'The Activity Report plugin does not store any personal data. It only reads existing log data.';
+
+// Event descriptions.
+$string['eventdesc_user_loggedin'] = 'User {$a->user} logged in to the platform.';
+$string['eventdesc_course_module_viewed'] = 'User {$a->user} viewed module "{$a->module}" in course "{$a->course}".';
+$string['eventdesc_course_module_completion_updated'] = 'User {$a->user} updated completion of module "{$a->module}" in course "{$a->course}".';
+$string['eventdesc_course_completed'] = 'User {$a->user} completed course "{$a->course}".';
+$string['eventdesc_attempt_started'] = 'User {$a->user} started an attempt at quiz "{$a->module}" in course "{$a->course}".';
+$string['eventdesc_attempt_submitted'] = 'User {$a->user} submitted an attempt at quiz "{$a->module}" in course "{$a->course}".';
+$string['eventdesc_attempt_reviewed'] = 'User {$a->user} reviewed quiz attempt "{$a->module}" in course "{$a->course}".';
+$string['eventdesc_attempt_viewed'] = 'User {$a->user} viewed quiz attempt "{$a->module}" in course "{$a->course}".';
+
+// Event names (fallback).
+$string['eventname_user_loggedin'] = 'User logged in';
+$string['eventname_course_module_viewed'] = 'Course module viewed';
+$string['eventname_course_module_completion_updated'] = 'Module completion updated';
+$string['eventname_course_completed'] = 'Course completed';
+$string['eventname_attempt_started'] = 'Quiz attempt started';
+$string['eventname_attempt_submitted'] = 'Quiz attempt submitted';
+$string['eventname_attempt_reviewed'] = 'Quiz attempt reviewed';
+$string['eventname_attempt_viewed'] = 'Quiz attempt viewed';

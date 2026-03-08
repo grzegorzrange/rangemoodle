@@ -37,11 +37,19 @@ $PAGE->set_heading(get_string('pluginname', 'local_organizational'));
 echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('organizationalmatters', 'local_organizational'));
 
-$addurl = new moodle_url('/local/organizational/edit.php');
-echo html_writer::div(
-    $OUTPUT->single_button($addurl, get_string('addorganizational', 'local_organizational'), 'get'),
-    'mb-3'
+// Show "Add" button only if there are directions without an organizational record.
+$availabledirections = $DB->count_records_sql(
+    'SELECT COUNT(*)
+       FROM {local_recruitment_course} rc
+      WHERE NOT EXISTS (SELECT 1 FROM {local_organizational} o WHERE o.directionid = rc.id)'
 );
+if ($availabledirections > 0) {
+    $addurl = new moodle_url('/local/organizational/edit.php');
+    echo html_writer::div(
+        $OUTPUT->single_button($addurl, get_string('addorganizational', 'local_organizational'), 'get'),
+        'mb-3'
+    );
+}
 
 $table = new \local_organizational\output\organizational_table('local-organizational-list', $pageurl);
 $table->out(50, true);

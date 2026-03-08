@@ -42,10 +42,12 @@ class block_announcements extends block_base {
         $this->content = new stdClass();
         $this->content->footer = '';
 
+        $isadmin = is_siteadmin();
+
         // Get active direction ID from session.
         $directionid = !empty($SESSION->active_direction_id) ? (int)$SESSION->active_direction_id : 0;
 
-        if (!$directionid) {
+        if (!$directionid && !$isadmin) {
             $this->content->text = get_string('noactiverecruitment', 'block_announcements');
             return $this->content;
         }
@@ -54,7 +56,12 @@ class block_announcements extends block_base {
         $perpage = 3;
         $context = context_system::instance();
 
-        $result = \local_dashboard\announcement::get_for_direction($directionid, $page, $perpage);
+        // Admin sees all visible announcements across all directions.
+        if ($isadmin) {
+            $result = \local_dashboard\announcement::get_all_visible($page, $perpage);
+        } else {
+            $result = \local_dashboard\announcement::get_for_direction($directionid, $page, $perpage);
+        }
         $records = $result['records'];
         $total = $result['total'];
 
@@ -74,7 +81,7 @@ class block_announcements extends block_base {
 
             $viewurl = new moodle_url('/local/dashboard/announcement_view.php', ['id' => $record->id]);
 
-            $tiles[] = [
+            $tile = [
                 'name' => format_string($record->name),
                 'text' => s($plaintext),
                 'date' => userdate($record->timecreated, get_string('strftimedaydatetime', 'langconfig')),
@@ -82,6 +89,14 @@ class block_announcements extends block_base {
                 'hasattachments' => $attachcount > 0,
                 'viewurl' => $viewurl->out(false),
             ];
+
+            // Admin-only: show direction name tag.
+            if ($isadmin) {
+                $tile['directionname'] = isset($record->directionname) ? format_string($record->directionname) : '';
+                $tile['isadmin'] = true;
+            }
+
+            $tiles[] = $tile;
         }
 
         $totalpages = ceil($total / $perpage);
@@ -104,10 +119,15 @@ class block_announcements extends block_base {
         }
 
         $innerhtml = $OUTPUT->render_from_template('block_announcements/content', $templatedata);
-        $this->content->text = '<div data-region="block-announcements">' . $innerhtml . '</div>';
+        $this->content->text = '<div data-region="block-announcements"'
+            . ($isadmin ? ' data-admin="1"' : '')
+            . '>' . $innerhtml . '</div>';
 
-        // Load AJAX paging JS.
-        $PAGE->requires->js_call_amd('block_announcements/paging', 'init', [$directionid, $page]);
+        // Load AJAX paging JS. Pass directionid=0 for admin (all directions).
+        $PAGE->requires->js_call_amd('block_announcements/paging', 'init', [
+            $isadmin ? 0 : $directionid,
+            $page,
+        ]);
 
         return $this->content;
     }

@@ -242,6 +242,27 @@ class announcement {
     }
 
     /**
+     * Get all visible announcements across all directions (for admin).
+     *
+     * @param int $page Page number (0-based).
+     * @param int $perpage Items per page.
+     * @return array ['records' => array, 'total' => int]
+     */
+    public static function get_all_visible(int $page = 0, int $perpage = 3): array {
+        global $DB;
+
+        $total = $DB->count_records(self::TABLE, ['visible' => 1]);
+        $sql = "SELECT a.*, rc.name AS directionname
+                  FROM {" . self::TABLE . "} a
+             LEFT JOIN {local_recruitment_course} rc ON rc.id = a.directionid
+                 WHERE a.visible = 1
+              ORDER BY a.timecreated DESC";
+        $records = $DB->get_records_sql($sql, [], $page * $perpage, $perpage);
+
+        return ['records' => $records, 'total' => $total];
+    }
+
+    /**
      * Count attachment files for an announcement.
      *
      * @param int $id Announcement ID.

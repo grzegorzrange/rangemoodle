@@ -432,8 +432,8 @@ class recruitment {
         }
 
         // Detect header row and build column map.
-        // Default column order: username;firstname;lastname;email;declaration
-        $colmap = ['username' => 0, 'firstname' => 1, 'lastname' => 2, 'email' => 3, 'declaration' => 4];
+        // Default column order: username;firstname;lastname;email;phone;declaration
+        $colmap = ['username' => 0, 'firstname' => 1, 'lastname' => 2, 'email' => 3, 'phone' => null, 'declaration' => 4];
         $mincols = 5;
 
         $firstline = strtolower(trim($lines[0]));
@@ -445,12 +445,15 @@ class recruitment {
                 $detected[$col] = $idx;
             }
             // Map known columns by name.
-            foreach (['username', 'firstname', 'lastname', 'email', 'declaration'] as $key) {
+            foreach (['username', 'firstname', 'lastname', 'email', 'phone', 'phone1', 'declaration'] as $key) {
                 if (isset($detected[$key])) {
-                    $colmap[$key] = $detected[$key];
+                    $mapkey = ($key === 'phone1') ? 'phone' : $key;
+                    $colmap[$mapkey] = $detected[$key];
                 }
             }
-            $mincols = max($colmap) + 1;
+            // Calculate minimum columns needed (exclude optional phone if not in header).
+            $requiredcols = array_filter($colmap, function($v) { return $v !== null; });
+            $mincols = max($requiredcols) + 1;
             array_shift($lines);
         }
 
@@ -475,6 +478,7 @@ class recruitment {
             $firstname = trim($parts[$colmap['firstname']]);
             $lastname = trim($parts[$colmap['lastname']]);
             $email = trim($parts[$colmap['email']]);
+            $phone = ($colmap['phone'] !== null && isset($parts[$colmap['phone']])) ? trim($parts[$colmap['phone']]) : '';
             $declarationstr = strtolower(trim($parts[$colmap['declaration']]));
 
             if (empty($username) || empty($firstname) || empty($lastname)) {
@@ -497,6 +501,7 @@ class recruitment {
                 $newuser->firstname = $firstname;
                 $newuser->lastname = $lastname;
                 $newuser->email = !empty($email) ? $email : '';
+                $newuser->phone1 = $phone;
                 $newuser->auth = 'manual';
                 $newuser->confirmed = 1;
                 $newuser->mnethostid = $CFG->mnet_localhost_id;
@@ -513,6 +518,12 @@ class recruitment {
                     $result['errors'][] = get_string('importerror', 'local_recruitment', $a);
                     continue;
                 }
+            }
+
+            // Update phone if provided and user exists.
+            if (!empty($phone) && empty($user->phone1)) {
+                $DB->set_field('user', 'phone1', $phone, ['id' => $user->id]);
+                $user->phone1 = $phone;
             }
 
             // Insert or update local_recruitment_user record.

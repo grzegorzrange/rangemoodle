@@ -58,6 +58,7 @@ class wp_sync_service {
             'firstname' => $user->firstname,
             'lastname'  => $user->lastname,
             'email'     => $email,
+            'moodle_id' => $user->id
         ];
 
         $body = json_encode($data, JSON_UNESCAPED_UNICODE);

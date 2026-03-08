@@ -45,11 +45,10 @@ class schedule_table extends \table_sql {
         parent::__construct($uniqueid);
         $this->baseurl = $url;
 
-        $columns = ['directionname', 'name', 'message', 'actions'];
+        $columns = ['directionname', 'name', 'actions'];
         $headers = [
             get_string('direction', 'local_schedule'),
             get_string('schedulename', 'local_schedule'),
-            get_string('schedulecontent', 'local_schedule'),
             get_string('actions'),
         ];
 
@@ -60,7 +59,6 @@ class schedule_table extends \table_sql {
         $this->sortable(true, 'name', SORT_ASC);
         $this->pageable(true);
         $this->no_sorting('actions');
-        $this->no_sorting('message');
 
         $concat = $DB->sql_concat('r.name', "' → '", 'rc.name');
         $this->set_sql(
@@ -97,6 +95,11 @@ class schedule_table extends \table_sql {
         global $OUTPUT;
 
         $actions = '';
+
+        // View.
+        $viewurl = new \moodle_url('/local/schedule/view.php', ['id' => $row->id]);
+        $actions .= \html_writer::link($viewurl, $OUTPUT->pix_icon('t/preview', get_string('view')));
+        $actions .= ' ';
 
         // Edit.
         $editurl = new \moodle_url('/local/schedule/edit.php', ['id' => $row->id]);

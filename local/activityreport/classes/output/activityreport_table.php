@@ -50,6 +50,33 @@ class activityreport_table extends \table_sql {
         '\\mod_quiz\\event\\attempt_viewed',
     ];
 
+    /**
+     * Mapping from event action key to lang string identifier.
+     * The key is derived from the last part of the event class name.
+     */
+    private const EVENT_DESC_MAP = [
+        'user_loggedin' => 'eventdesc_user_loggedin',
+        'course_module_viewed' => 'eventdesc_course_module_viewed',
+        'course_module_completion_updated' => 'eventdesc_course_module_completion_updated',
+        'course_completed' => 'eventdesc_course_completed',
+        'attempt_started' => 'eventdesc_attempt_started',
+        'attempt_submitted' => 'eventdesc_attempt_submitted',
+        'attempt_reviewed' => 'eventdesc_attempt_reviewed',
+        'attempt_viewed' => 'eventdesc_attempt_viewed',
+    ];
+
+    /** @var array Mapping from event action key to lang string for event name. */
+    private const EVENT_NAME_MAP = [
+        'user_loggedin' => 'eventname_user_loggedin',
+        'course_module_viewed' => 'eventname_course_module_viewed',
+        'course_module_completion_updated' => 'eventname_course_module_completion_updated',
+        'course_completed' => 'eventname_course_completed',
+        'attempt_started' => 'eventname_attempt_started',
+        'attempt_submitted' => 'eventname_attempt_submitted',
+        'attempt_reviewed' => 'eventname_attempt_reviewed',
+        'attempt_viewed' => 'eventname_attempt_viewed',
+    ];
+
     /** @var array Filter values. */
     private array $filters;
 
@@ -106,6 +133,7 @@ class activityreport_table extends \table_sql {
         $descriptionexpr = $DB->sql_concat('l.component', "' '", 'l.action', "' '", 'l.target');
 
         $fields = "l.id, l.eventname, l.component, l.action, l.target, l.objecttable, l.objectid,
+                   l.crud, l.edulevel, l.anonymous,
                    l.contextid, l.contextlevel, l.contextinstanceid, l.userid, l.courseid,
                    l.relateduserid, l.other, l.timecreated, l.origin, l.ip,
                    u.firstname, u.lastname, u.email,
@@ -161,10 +189,6 @@ class activityreport_table extends \table_sql {
      */
     private function restore_event(\stdClass $row): ?\core\event\base {
         try {
-            $data = (array) $row;
-            // Remove the computed description alias to avoid interference.
-            unset($data['description']);
-
             $extra = [
                 'origin' => $row->origin ?? '',
                 'ip' => $row->ip ?? '',
@@ -174,17 +198,92 @@ class activityreport_table extends \table_sql {
             // Decode 'other' field.
             $other = $row->other ?? null;
             if ($other === null || $other === '' || $other === 'N;') {
-                $data['other'] = null;
+                $otherdata = null;
             } else if (preg_match('~^[aOibs][:;]~', $other)) {
-                $data['other'] = @unserialize($other, ['allowed_classes' => [\stdClass::class]]);
+                $otherdata = @unserialize($other, ['allowed_classes' => [\stdClass::class]]);
             } else {
-                $data['other'] = json_decode($other, true);
+                $otherdata = json_decode($other, true);
             }
+
+            // Build $data with only the keys that event::restore() expects.
+            $data = [
+                'eventname' => $row->eventname,
+                'component' => $row->component ?? '',
+                'action' => $row->action ?? '',
+                'target' => $row->target ?? '',
+                'objecttable' => $row->objecttable ?? '',
+                'objectid' => $row->objectid ?? null,
+                'crud' => $row->crud ?? 'r',
+                'edulevel' => $row->edulevel ?? 0,
+                'contextid' => $row->contextid ?? 0,
+                'contextlevel' => $row->contextlevel ?? 0,
+                'contextinstanceid' => $row->contextinstanceid ?? 0,
+                'userid' => $row->userid ?? 0,
+                'courseid' => $row->courseid ?? 0,
+                'relateduserid' => $row->relateduserid ?? null,
+                'anonymous' => $row->anonymous ?? 0,
+                'other' => $otherdata,
+                'timecreated' => $row->timecreated ?? 0,
+            ];
 
             return \core\event\base::restore($data, $extra);
         } catch (\Throwable $e) {
             return null;
         }
+    }
+
+    /**
+     * Extract the event action key from the full eventname class.
+     *
+     * E.g. '\\core\\event\\user_loggedin' => 'user_loggedin'
+     *      '\\mod_quiz\\event\\attempt_started' => 'attempt_started'
+     *      '\\mod_resource\\event\\course_module_viewed' => 'course_module_viewed'
+     *
+     * @param string $eventname
+     * @return string
+     */
+    private function get_event_key(string $eventname): string {
+        $parts = explode('\\', trim($eventname, '\\'));
+        return end($parts);
+    }
+
+    /**
+     * Get user fullname, course name, and module name for description placeholders.
+     *
+     * @param \stdClass $row
+     * @return object {user, course, module}
+     */
+    private function get_description_params(\stdClass $row): object {
+        global $DB;
+
+        $a = new \stdClass();
+        $a->user = trim(($row->firstname ?? '') . ' ' . ($row->lastname ?? ''));
+        $a->course = '';
+        $a->module = '';
+
+        // Get course name.
+        if (!empty($row->courseid)) {
+            $course = $DB->get_field('course', 'fullname', ['id' => $row->courseid]);
+            if ($course) {
+                $a->course = $course;
+            }
+        }
+
+        // Get module name from context.
+        if (!empty($row->contextinstanceid) && !empty($row->contextlevel) && $row->contextlevel == CONTEXT_MODULE) {
+            $cm = $DB->get_record('course_modules', ['id' => $row->contextinstanceid], 'id, instance, module');
+            if ($cm) {
+                $moduletype = $DB->get_field('modules', 'name', ['id' => $cm->module]);
+                if ($moduletype) {
+                    $name = $DB->get_field($moduletype, 'name', ['id' => $cm->instance]);
+                    if ($name) {
+                        $a->module = $name;
+                    }
+                }
+            }
+        }
+
+        return $a;
     }
 
     /**
@@ -194,6 +293,11 @@ class activityreport_table extends \table_sql {
      * @return string
      */
     public function col_eventname(\stdClass $row): string {
+        $key = $this->get_event_key($row->eventname);
+        if (isset(self::EVENT_NAME_MAP[$key])) {
+            return get_string(self::EVENT_NAME_MAP[$key], 'local_activityreport');
+        }
+        // Fallback: try the event's own get_name().
         $event = $this->restore_event($row);
         if ($event) {
             try {
@@ -202,7 +306,6 @@ class activityreport_table extends \table_sql {
                 // Fall through.
             }
         }
-        // Fallback: show class name without backslashes.
         return str_replace('\\', ' \\ ', ltrim($row->eventname, '\\'));
     }
 
@@ -213,6 +316,16 @@ class activityreport_table extends \table_sql {
      * @return string
      */
     public function col_description(\stdClass $row): string {
+        $key = $this->get_event_key($row->eventname);
+        if (isset(self::EVENT_DESC_MAP[$key])) {
+            $a = $this->get_description_params($row);
+            $desc = get_string(self::EVENT_DESC_MAP[$key], 'local_activityreport', $a);
+            if (\core_text::strlen($desc) > 200) {
+                $desc = \core_text::substr($desc, 0, 200) . '...';
+            }
+            return $desc;
+        }
+        // Fallback to event's own description.
         $event = $this->restore_event($row);
         if ($event) {
             try {

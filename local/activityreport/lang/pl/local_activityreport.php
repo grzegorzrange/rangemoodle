@@ -41,3 +41,23 @@ $string['filter_description'] = 'Opis';
 $string['filter_datefrom'] = 'Data od';
 $string['filter_dateto'] = 'Data do';
 $string['privacy:metadata'] = 'Wtyczka Raport aktywności nie przechowuje żadnych danych osobowych. Odczytuje jedynie istniejące dane z logów.';
+
+// Polish event descriptions.
+$string['eventdesc_user_loggedin'] = 'Użytkownik {$a->user} zalogował się na platformę.';
+$string['eventdesc_course_module_viewed'] = 'Użytkownik {$a->user} wyświetlił materiał „{$a->module}" w kursie „{$a->course}".';
+$string['eventdesc_course_module_completion_updated'] = 'Użytkownik {$a->user} zaktualizował ukończenie modułu „{$a->module}" w kursie „{$a->course}".';
+$string['eventdesc_course_completed'] = 'Użytkownik {$a->user} ukończył kurs „{$a->course}".';
+$string['eventdesc_attempt_started'] = 'Użytkownik {$a->user} rozpoczął podejście do testu „{$a->module}" w kursie „{$a->course}".';
+$string['eventdesc_attempt_submitted'] = 'Użytkownik {$a->user} wysłał podejście do testu „{$a->module}" w kursie „{$a->course}".';
+$string['eventdesc_attempt_reviewed'] = 'Użytkownik {$a->user} przeglądał wynik testu „{$a->module}" w kursie „{$a->course}".';
+$string['eventdesc_attempt_viewed'] = 'Użytkownik {$a->user} wyświetlił podejście do testu „{$a->module}" w kursie „{$a->course}".';
+
+// Polish event names (fallback).
+$string['eventname_user_loggedin'] = 'Logowanie użytkownika';
+$string['eventname_course_module_viewed'] = 'Wyświetlenie modułu kursu';
+$string['eventname_course_module_completion_updated'] = 'Aktualizacja ukończenia modułu';
+$string['eventname_course_completed'] = 'Ukończenie kursu';
+$string['eventname_attempt_started'] = 'Rozpoczęcie podejścia do testu';
+$string['eventname_attempt_submitted'] = 'Wysłanie podejścia do testu';
+$string['eventname_attempt_reviewed'] = 'Przegląd wyniku testu';
+$string['eventname_attempt_viewed'] = 'Wyświetlenie podejścia do testu';

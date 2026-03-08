@@ -51,6 +51,9 @@ $form->set_data($record);
 if ($form->is_cancelled()) {
     redirect($returnurl);
 } else if ($data = $form->get_data()) {
+    // Convert month/year selects back to timestamp (1st day of selected month).
+    $data->recruitmentdate = mktime(0, 0, 0, (int)$data->recruitmentmonth, 1, (int)$data->recruitmentyear);
+
     if ($data->id) {
         \local_recruitment\recruitment::update($data);
 

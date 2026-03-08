@@ -81,11 +81,13 @@ class logreport_table extends \table_sql {
         $descriptionexpr = $DB->sql_concat('l.component', "' '", 'l.action', "' '", 'l.target');
 
         $fields = "l.id, l.eventname, l.component, l.action, l.target, l.objecttable, l.objectid,
+                   l.crud, l.edulevel, l.anonymous,
                    l.contextid, l.contextlevel, l.contextinstanceid, l.userid, l.courseid,
                    l.relateduserid, l.other, l.timecreated, l.origin, l.ip,
+                   u.firstname, u.lastname,
                    {$descriptionexpr} AS description";
 
-        $from = "{logstore_standard_log} l";
+        $from = "{logstore_standard_log} l LEFT JOIN {user} u ON u.id = l.userid";
 
         // Build the WHERE clause combining all three scopes:
         // 1. Local plugin content change events (component starts with 'local_').
@@ -136,7 +138,7 @@ class logreport_table extends \table_sql {
         }
 
         $this->set_sql($fields, $from, $where, $params);
-        $this->set_count_sql("SELECT COUNT(1) FROM {logstore_standard_log} l WHERE $where", $params);
+        $this->set_count_sql("SELECT COUNT(1) FROM {logstore_standard_log} l LEFT JOIN {user} u ON u.id = l.userid WHERE $where", $params);
     }
 
     /**
@@ -147,9 +149,6 @@ class logreport_table extends \table_sql {
      */
     private function restore_event(\stdClass $row): ?\core\event\base {
         try {
-            $data = (array) $row;
-            unset($data['description']);
-
             $extra = [
                 'origin' => $row->origin ?? '',
                 'ip' => $row->ip ?? '',
@@ -158,17 +157,185 @@ class logreport_table extends \table_sql {
 
             $other = $row->other ?? null;
             if ($other === null || $other === '' || $other === 'N;') {
-                $data['other'] = null;
+                $otherdata = null;
             } else if (preg_match('~^[aOibs][:;]~', $other)) {
-                $data['other'] = @unserialize($other, ['allowed_classes' => [\stdClass::class]]);
+                $otherdata = @unserialize($other, ['allowed_classes' => [\stdClass::class]]);
             } else {
-                $data['other'] = json_decode($other, true);
+                $otherdata = json_decode($other, true);
             }
+
+            // Build $data with only the keys that event::restore() expects.
+            $data = [
+                'eventname' => $row->eventname,
+                'component' => $row->component ?? '',
+                'action' => $row->action ?? '',
+                'target' => $row->target ?? '',
+                'objecttable' => $row->objecttable ?? '',
+                'objectid' => $row->objectid ?? null,
+                'crud' => $row->crud ?? 'r',
+                'edulevel' => $row->edulevel ?? 0,
+                'contextid' => $row->contextid ?? 0,
+                'contextlevel' => $row->contextlevel ?? 0,
+                'contextinstanceid' => $row->contextinstanceid ?? 0,
+                'userid' => $row->userid ?? 0,
+                'courseid' => $row->courseid ?? 0,
+                'relateduserid' => $row->relateduserid ?? null,
+                'anonymous' => $row->anonymous ?? 0,
+                'other' => $otherdata,
+                'timecreated' => $row->timecreated ?? 0,
+            ];
 
             return \core\event\base::restore($data, $extra);
         } catch (\Throwable $e) {
             return null;
         }
+    }
+
+    /** @var array Component name translation cache. */
+    private static array $componentcache = [
+        'local_recruitment' => 'component_local_recruitment',
+        'local_dashboard' => 'component_local_dashboard',
+        'local_financial' => 'component_local_financial',
+        'local_organizational' => 'component_local_organizational',
+        'local_schedule' => 'component_local_schedule',
+        'core' => 'component_core',
+    ];
+
+    /** @var array Target translation cache. */
+    private static array $targetcache = [
+        'recruitment' => 'target_recruitment',
+        'announcement' => 'target_announcement',
+        'financial' => 'target_financial',
+        'organizational' => 'target_organizational',
+        'schedule' => 'target_schedule',
+        'course' => 'target_course',
+        'user' => 'target_user',
+        'role' => 'target_role',
+        'category' => 'target_category',
+        'cohort' => 'target_cohort',
+        'questions' => 'target_questions',
+    ];
+
+    /**
+     * Translate component name.
+     *
+     * @param string $component
+     * @return string
+     */
+    private function translate_component(string $component): string {
+        if (isset(self::$componentcache[$component])) {
+            return get_string(self::$componentcache[$component], 'local_logreport');
+        }
+        // Try to get a human-readable name from Moodle.
+        try {
+            return \core_component::get_component_string($component);
+        } catch (\Throwable $e) {
+            return $component;
+        }
+    }
+
+    /**
+     * Translate target name.
+     *
+     * @param string $target
+     * @return string
+     */
+    private function translate_target(string $target): string {
+        if (isset(self::$targetcache[$target])) {
+            return get_string(self::$targetcache[$target], 'local_logreport');
+        }
+        return $target;
+    }
+
+    /**
+     * Translate CRUD action.
+     *
+     * @param string $crud
+     * @return string
+     */
+    private function translate_crud(string $crud): string {
+        $map = ['c' => 'crud_c', 'r' => 'crud_r', 'u' => 'crud_u', 'd' => 'crud_d'];
+        if (isset($map[$crud])) {
+            return get_string($map[$crud], 'local_logreport');
+        }
+        return $crud;
+    }
+
+    /**
+     * Build Polish description for a log row.
+     *
+     * @param \stdClass $row
+     * @return string
+     */
+    private function build_description(\stdClass $row): string {
+        global $DB;
+
+        $username = '';
+        if (!empty($row->firstname) || !empty($row->lastname)) {
+            $username = trim(($row->firstname ?? '') . ' ' . ($row->lastname ?? ''));
+        }
+        if (empty($username) && !empty($row->userid)) {
+            $username = get_string('unknownuser') . " (ID: {$row->userid})";
+        }
+
+        // Special case: question import.
+        if ($row->eventname === '\\core\\event\\questions_imported') {
+            $a = (object)['user' => $username];
+            return get_string('eventdesc_questions_imported', 'local_logreport', $a);
+        }
+
+        $component = $this->translate_component($row->component ?? '');
+        $target = $this->translate_target($row->target ?? '');
+        $action = $this->translate_crud($row->crud ?? 'r');
+
+        $a = (object)[
+            'user' => $username,
+            'action' => $action,
+            'target' => $target,
+            'component' => $component,
+            'course' => '',
+            'module' => '',
+        ];
+
+        // Get course name if available.
+        if (!empty($row->courseid) && $row->courseid > 1) {
+            $coursename = $DB->get_field('course', 'fullname', ['id' => $row->courseid]);
+            if ($coursename) {
+                $a->course = $coursename;
+            }
+        }
+
+        // Get module name if in module context.
+        if (!empty($row->contextinstanceid) && !empty($row->contextlevel) && $row->contextlevel == CONTEXT_MODULE) {
+            $cm = $DB->get_record('course_modules', ['id' => $row->contextinstanceid], 'id, instance, module');
+            if ($cm) {
+                $moduletype = $DB->get_field('modules', 'name', ['id' => $cm->module]);
+                if ($moduletype) {
+                    $name = $DB->get_field($moduletype, 'name', ['id' => $cm->instance]);
+                    if ($name) {
+                        $a->module = $name;
+                    }
+                }
+            }
+        }
+
+        // For local plugin CRUD events, use specific templates.
+        if (strpos($row->component ?? '', 'local_') === 0) {
+            $crud = $row->crud ?? 'r';
+            $crudmap = ['c' => 'eventdesc_created', 'u' => 'eventdesc_updated', 'd' => 'eventdesc_deleted', 'r' => 'eventdesc_viewed'];
+            if (isset($crudmap[$crud])) {
+                return get_string($crudmap[$crud], 'local_logreport', $a);
+            }
+        }
+
+        // Generic templates.
+        if (!empty($a->module)) {
+            return get_string('eventdesc_generic_module', 'local_logreport', $a);
+        }
+        if (!empty($a->course)) {
+            return get_string('eventdesc_generic_course', 'local_logreport', $a);
+        }
+        return get_string('eventdesc_generic', 'local_logreport', $a);
     }
 
     /**
@@ -196,20 +363,12 @@ class logreport_table extends \table_sql {
      * @return string
      */
     public function col_description(\stdClass $row): string {
-        $event = $this->restore_event($row);
-        if ($event) {
-            try {
-                $desc = $event->get_description();
-                $desc = strip_tags($desc);
-                if (\core_text::strlen($desc) > 300) {
-                    $desc = \core_text::substr($desc, 0, 300) . '...';
-                }
-                return $desc;
-            } catch (\Throwable $e) {
-                // Fall through.
-            }
+        $desc = $this->build_description($row);
+        $desc = strip_tags($desc);
+        if (\core_text::strlen($desc) > 300) {
+            $desc = \core_text::substr($desc, 0, 300) . '...';
         }
-        return '';
+        return $desc;
     }
 
     /**

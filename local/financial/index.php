@@ -37,11 +37,19 @@ $PAGE->set_heading(get_string('pluginname', 'local_financial'));
 echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('financialmatters', 'local_financial'));
 
-$addurl = new moodle_url('/local/financial/edit.php');
-echo html_writer::div(
-    $OUTPUT->single_button($addurl, get_string('addfinancial', 'local_financial'), 'get'),
-    'mb-3'
+// Show "Add" button only if there are directions without a financial record.
+$availabledirections = $DB->count_records_sql(
+    'SELECT COUNT(*)
+       FROM {local_recruitment_course} rc
+      WHERE NOT EXISTS (SELECT 1 FROM {local_financial} f WHERE f.directionid = rc.id)'
 );
+if ($availabledirections > 0) {
+    $addurl = new moodle_url('/local/financial/edit.php');
+    echo html_writer::div(
+        $OUTPUT->single_button($addurl, get_string('addfinancial', 'local_financial'), 'get'),
+        'mb-3'
+    );
+}
 
 $table = new \local_financial\output\financial_table('local-financial-list', $pageurl);
 $table->out(50, true);

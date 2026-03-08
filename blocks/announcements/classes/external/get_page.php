@@ -69,8 +69,10 @@ class get_page extends external_api {
         $context = \context_system::instance();
         self::validate_context($context);
 
+        $isadmin = is_siteadmin();
+
         // Check that the user has access to this direction (admin or cohort member).
-        if (!is_siteadmin()) {
+        if (!$isadmin) {
             $direction = $DB->get_record('local_recruitment_course', ['id' => $params['directionid']]);
             if (!$direction || !$direction->cohortid ||
                     !$DB->record_exists('cohort_members', ['cohortid' => $direction->cohortid, 'userid' => $USER->id])) {
@@ -79,7 +81,13 @@ class get_page extends external_api {
         }
 
         $perpage = 3;
-        $result = \local_dashboard\announcement::get_for_direction($params['directionid'], $params['page'], $perpage);
+
+        // Admin with directionid=0 sees all visible announcements.
+        if ($isadmin && empty($params['directionid'])) {
+            $result = \local_dashboard\announcement::get_all_visible($params['page'], $perpage);
+        } else {
+            $result = \local_dashboard\announcement::get_for_direction($params['directionid'], $params['page'], $perpage);
+        }
         $total = $result['total'];
         $totalpages = (int)ceil($total / $perpage);
 
@@ -93,14 +101,30 @@ class get_page extends external_api {
             $attachcount = \local_dashboard\announcement::count_attachments($record->id, $context);
             $viewurl = new \moodle_url('/local/dashboard/announcement_view.php', ['id' => $record->id]);
 
-            $tiles[] = [
+            $tile = [
                 'name' => format_string($record->name),
                 'text' => $plaintext,
                 'date' => userdate($record->timecreated, get_string('strftimedaydatetime', 'langconfig')),
                 'attachcount' => (int)$attachcount,
                 'hasattachments' => $attachcount > 0,
                 'viewurl' => $viewurl->out(false),
+                'directionname' => '',
+                'isadmin' => false,
             ];
+
+            // Admin-only: include direction name tag.
+            if ($isadmin) {
+                $tile['isadmin'] = true;
+                if (isset($record->directionname)) {
+                    $tile['directionname'] = format_string($record->directionname);
+                } else {
+                    // Fetch direction name if not joined.
+                    $dir = $DB->get_record('local_recruitment_course', ['id' => $record->directionid], 'name');
+                    $tile['directionname'] = $dir ? format_string($dir->name) : '';
+                }
+            }
+
+            $tiles[] = $tile;
         }
 
         return [
@@ -125,6 +149,8 @@ class get_page extends external_api {
                     'attachcount' => new external_value(PARAM_INT, 'Number of attachments'),
                     'hasattachments' => new external_value(PARAM_BOOL, 'Has attachments'),
                     'viewurl' => new external_value(PARAM_URL, 'View URL'),
+                    'directionname' => new external_value(PARAM_TEXT, 'Direction name (admin only)', VALUE_OPTIONAL),
+                    'isadmin' => new external_value(PARAM_BOOL, 'Whether user is admin', VALUE_DEFAULT, false),
                 ])
             ),
             'totalpages' => new external_value(PARAM_INT, 'Total pages'),

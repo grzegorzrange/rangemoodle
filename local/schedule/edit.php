@@ -56,7 +56,7 @@ if ($id) {
     );
 }
 
-$form = new \local_schedule\form\schedule_form($pageurl, ['context' => $context]);
+$form = new \local_schedule\form\schedule_form($pageurl, ['context' => $context, 'editid' => $id]);
 $form->set_data($record);
 
 if ($form->is_cancelled()) {

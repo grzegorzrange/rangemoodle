@@ -58,10 +58,10 @@ function local_dashboard_render_navbar_output($renderer) {
     if (count($directions) > 1) {
         $changeurl = new \moodle_url('/local/dashboard/index.php', ['change' => 1]);
         $btntext = get_string('changecourse', 'local_dashboard');
-        $btnhtml = '<a href="' . $changeurl->out(false) . '" class="btn btn-sm btn-change-recruitment">' . $btntext . '</a>';
+        $btnhtml = '<a href="' . $changeurl->out(false) . '" class="btn btn-sm btn-change-recruitment" style="margin-left: 15px;">' . $btntext . '</a>';
     }
 
-    return '<div class="d-flex align-items-center me-2">' .
+    return '<div class="d-flex align-items-center me-2" style="margin-left: 20px;">' .
         '<span class="d-none d-sm-inline small me-2">' . $label . ' <strong>' . $displayname . '</strong></span>' .
         $btnhtml .
         '</div>';

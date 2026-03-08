@@ -37,12 +37,19 @@ $PAGE->set_heading(get_string('pluginname', 'local_schedule'));
 echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('schedules', 'local_schedule'));
 
-// Add new schedule button.
-$addurl = new moodle_url('/local/schedule/edit.php');
-echo html_writer::div(
-    $OUTPUT->single_button($addurl, get_string('addschedule', 'local_schedule'), 'get'),
-    'mb-3'
+// Show "Add" button only if there are directions without a schedule.
+$availabledirections = $DB->count_records_sql(
+    'SELECT COUNT(*)
+       FROM {local_recruitment_course} rc
+      WHERE NOT EXISTS (SELECT 1 FROM {local_schedule} s WHERE s.directionid = rc.id)'
 );
+if ($availabledirections > 0) {
+    $addurl = new moodle_url('/local/schedule/edit.php');
+    echo html_writer::div(
+        $OUTPUT->single_button($addurl, get_string('addschedule', 'local_schedule'), 'get'),
+        'mb-3'
+    );
+}
 
 // Display schedule table.
 $table = new \local_schedule\output\schedule_table('local-schedule-list', $pageurl);

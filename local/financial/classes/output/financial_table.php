@@ -39,11 +39,10 @@ class financial_table extends \table_sql {
         parent::__construct($uniqueid);
         $this->baseurl = $url;
 
-        $columns = ['directionname', 'name', 'message', 'actions'];
+        $columns = ['directionname', 'name', 'actions'];
         $headers = [
             get_string('direction', 'local_financial'),
             get_string('financialname', 'local_financial'),
-            get_string('financialcontent', 'local_financial'),
             get_string('actions'),
         ];
 
@@ -54,7 +53,6 @@ class financial_table extends \table_sql {
         $this->sortable(true, 'name', SORT_ASC);
         $this->pageable(true);
         $this->no_sorting('actions');
-        $this->no_sorting('message');
 
         $concat = $DB->sql_concat('r.name', "' → '", 'rc.name');
         $this->set_sql(
@@ -79,6 +77,10 @@ class financial_table extends \table_sql {
         global $OUTPUT;
 
         $actions = '';
+
+        $viewurl = new \moodle_url('/local/financial/view.php', ['id' => $row->id]);
+        $actions .= \html_writer::link($viewurl, $OUTPUT->pix_icon('t/preview', get_string('view')));
+        $actions .= ' ';
 
         $editurl = new \moodle_url('/local/financial/edit.php', ['id' => $row->id]);
         $actions .= \html_writer::link($editurl, $OUTPUT->pix_icon('t/edit', get_string('edit')));

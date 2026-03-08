@@ -42,8 +42,9 @@ class import_users_form extends \moodleform {
         $mform->addElement('hidden', 'did');
         $mform->setType('did', PARAM_INT);
 
-        $mform->addElement('filepicker', 'csvfile', get_string('file'), null, [
-            'accepted_types' => ['.csv'],
+        $mform->addElement('filepicker', 'csvfile',
+            get_string('csvfilesemicolon', 'local_recruitment'), null, [
+            'accepted_types' => '*',
         ]);
         $mform->addRule('csvfile', null, 'required');
 
@@ -51,5 +52,23 @@ class import_users_form extends \moodleform {
             get_string('csvformat', 'local_recruitment'));
 
         $this->add_action_buttons(true, get_string('importusers', 'local_recruitment'));
+    }
+
+    /**
+     * Validate uploaded file is a CSV.
+     *
+     * @param array $data
+     * @param array $files
+     * @return array
+     */
+    public function validation($data, $files) {
+        $errors = parent::validation($data, $files);
+
+        $filename = $this->get_new_filename('csvfile');
+        if ($filename && !preg_match('/\.csv$/i', $filename)) {
+            $errors['csvfile'] = get_string('csvfileonly', 'local_recruitment');
+        }
+
+        return $errors;
     }
 }
