@@ -54,6 +54,10 @@ class recruitment_table extends \table_sql {
         $this->define_columns($columns);
         $this->define_headers($headers);
         $this->define_baseurl($url);
+        $this->column_style('name', 'width', '30%');
+        $this->column_style('recruitmentdate', 'width', '25%');
+        $this->column_style('coursecount', 'width', '20%');
+        $this->column_style('actions', 'width', '25%');
         $this->collapsible(false);
         $this->sortable(true, 'name', SORT_ASC);
         $this->pageable(true);

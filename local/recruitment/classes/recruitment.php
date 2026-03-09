@@ -431,6 +431,9 @@ class recruitment {
             return $result;
         }
 
+        // Auto-detect separator: semicolon or comma.
+        $separator = self::detect_csv_separator($lines[0]);
+
         // Detect header row and build column map.
         // Default column order: username;firstname;lastname;email;phone;declaration
         $colmap = ['username' => 0, 'firstname' => 1, 'lastname' => 2, 'email' => 3, 'phone' => null, 'declaration' => 4];
@@ -438,7 +441,7 @@ class recruitment {
 
         $firstline = strtolower(trim($lines[0]));
         if (strpos($firstline, 'username') !== false) {
-            $headerparts = str_getcsv($firstline, ';');
+            $headerparts = str_getcsv($firstline, $separator);
             $headerparts = array_map('trim', $headerparts);
             $detected = [];
             foreach ($headerparts as $idx => $col) {
@@ -464,7 +467,7 @@ class recruitment {
             }
 
             $csvline = $linenum + 2; // +2 because 1-based + header.
-            $parts = str_getcsv($line, ';');
+            $parts = str_getcsv($line, $separator);
 
             if (count($parts) < $mincols) {
                 $a = new \stdClass();
@@ -647,6 +650,18 @@ class recruitment {
             $value = '"' . str_replace('"', '""', $value) . '"';
         }
         return $value;
+    }
+
+    /**
+     * Auto-detect CSV separator by counting occurrences of semicolons and commas in the first line.
+     *
+     * @param string $firstline The first line of the CSV content.
+     * @return string The detected separator character (';' or ',').
+     */
+    private static function detect_csv_separator(string $firstline): string {
+        $semicolons = substr_count($firstline, ';');
+        $commas = substr_count($firstline, ',');
+        return ($semicolons >= $commas) ? ';' : ',';
     }
 
     /**

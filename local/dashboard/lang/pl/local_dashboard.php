@@ -85,3 +85,6 @@ $string['activityreport'] = 'Raport aktywności';
 $string['userprogress'] = 'Postęp użytkownika';
 $string['logreport'] = 'Raport logów';
 $string['direction'] = 'Kurs (kierunek)';
+$string['archives_overview'] = 'Archiwum wykładów';
+$string['preparation_overview'] = 'Przygotowanie do egzaminu';
+$string['internaltests_overview'] = 'Testy wewnętrzne';

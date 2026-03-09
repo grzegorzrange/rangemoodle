@@ -60,6 +60,14 @@ class direction_table extends \table_sql {
         $this->define_columns($columns);
         $this->define_headers($headers);
         $this->define_baseurl($url);
+        $this->column_style('name', 'width', '14%');
+        $this->column_style('basecategoryname', 'width', '12%');
+        $this->column_style('copystatus', 'width', '10%');
+        $this->column_style('archivecoursename', 'width', '14%');
+        $this->column_style('preparationcoursename', 'width', '14%');
+        $this->column_style('quizescoursename', 'width', '14%');
+        $this->column_style('cohortname', 'width', '12%');
+        $this->column_style('actions', 'width', '10%');
         $this->collapsible(false);
         $this->sortable(true, 'name', SORT_ASC);
         $this->pageable(true);

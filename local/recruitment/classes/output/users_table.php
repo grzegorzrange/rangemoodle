@@ -63,6 +63,14 @@ class users_table extends \table_sql {
         $this->define_columns($columns);
         $this->define_headers($headers);
         $this->define_baseurl($url);
+        $this->column_style('username', 'width', '12%');
+        $this->column_style('firstname', 'width', '12%');
+        $this->column_style('lastname', 'width', '14%');
+        $this->column_style('email', 'width', '18%');
+        $this->column_style('phone1', 'width', '10%');
+        $this->column_style('declaration', 'width', '10%');
+        $this->column_style('notified', 'width', '12%');
+        $this->column_style('actions', 'width', '12%');
         $this->collapsible(false);
         $this->sortable(true, 'lastname', SORT_ASC);
         $this->pageable(true);

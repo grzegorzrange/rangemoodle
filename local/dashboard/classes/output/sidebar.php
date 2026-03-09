@@ -177,6 +177,24 @@ class sidebar implements renderable, templatable {
                     'url' => (new \moodle_url('/local/organizational/index.php'))->out(false),
                 ],
                 [
+                    'key' => 'admin_archives',
+                    'text' => get_string('archives_overview', 'local_dashboard'),
+                    'icon' => 'fa-box-archive',
+                    'url' => (new \moodle_url('/local/recruitment/archives.php'))->out(false),
+                ],
+                [
+                    'key' => 'admin_preparation',
+                    'text' => get_string('preparation_overview', 'local_dashboard'),
+                    'icon' => 'fa-graduation-cap',
+                    'url' => (new \moodle_url('/local/recruitment/preparation.php'))->out(false),
+                ],
+                [
+                    'key' => 'admin_internaltests',
+                    'text' => get_string('internaltests_overview', 'local_dashboard'),
+                    'icon' => 'fa-clipboard-check',
+                    'url' => (new \moodle_url('/local/recruitment/internaltests.php'))->out(false),
+                ],
+                [
                     'key' => 'admin_activityreport',
                     'text' => get_string('activityreport', 'local_dashboard'),
                     'icon' => 'fa-chart-line',

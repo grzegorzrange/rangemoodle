@@ -31,4 +31,25 @@ if ($hassiteconfig) {
         new moodle_url('/local/recruitment/index.php'),
         'local/recruitment:manage'
     ));
+
+    $ADMIN->add('localplugins', new admin_externalpage(
+        'local_recruitment_archives',
+        get_string('archives_overview', 'local_recruitment'),
+        new moodle_url('/local/recruitment/archives.php'),
+        'local/recruitment:manage'
+    ));
+
+    $ADMIN->add('localplugins', new admin_externalpage(
+        'local_recruitment_preparation',
+        get_string('preparation_overview', 'local_recruitment'),
+        new moodle_url('/local/recruitment/preparation.php'),
+        'local/recruitment:manage'
+    ));
+
+    $ADMIN->add('localplugins', new admin_externalpage(
+        'local_recruitment_internaltests',
+        get_string('internaltests_overview', 'local_recruitment'),
+        new moodle_url('/local/recruitment/internaltests.php'),
+        'local/recruitment:manage'
+    ));
 }
