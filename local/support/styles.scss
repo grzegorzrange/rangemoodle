@@ -448,3 +448,11 @@ div[data-region="footer-container-popover"]{
     max-width: 300px;
   }
 }
+
+#page-admin-local-recruitment-internaltests,
+#page-admin-local-recruitment-preparation,
+#page-admin-local-recruitment-archives{
+  table th{
+    width: 50%;
+  }
+}
