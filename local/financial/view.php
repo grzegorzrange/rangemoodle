@@ -26,34 +26,41 @@ require_once(__DIR__ . '/../../config.php');
 
 require_login();
 
+$id = optional_param('id', 0, PARAM_INT);
+
 $context = context_system::instance();
 $PAGE->set_context($context);
-$PAGE->set_url(new moodle_url('/local/financial/view.php'));
+$PAGE->set_url(new moodle_url('/local/financial/view.php', $id ? ['id' => $id] : []));
 $PAGE->set_pagelayout('standard');
 $PAGE->set_title(get_string('financialmatters', 'local_financial'));
 $PAGE->set_heading(get_string('financialmatters', 'local_financial'));
 
 $isadmin = is_siteadmin();
-$directionid = !empty($SESSION->active_direction_id) ? (int)$SESSION->active_direction_id : 0;
 
-if (!$isadmin) {
+if ($id && $isadmin) {
+    // Admin viewing a specific record by ID.
+    $financial = $DB->get_record('local_financial', ['id' => $id], '*', MUST_EXIST);
+} else {
+    // Regular user or admin without ID — use session direction.
+    $directionid = !empty($SESSION->active_direction_id) ? (int)$SESSION->active_direction_id : 0;
+
+    if (!$isadmin) {
+        if (!$directionid) {
+            throw new \moodle_exception('nopermissions', 'error', '', get_string('viewfinancial', 'local_financial'));
+        }
+        if (!\local_financial\financial::user_has_access($directionid, $USER->id)) {
+            throw new \moodle_exception('nopermissions', 'error', '', get_string('viewfinancial', 'local_financial'));
+        }
+    }
+
     if (!$directionid) {
-        throw new \moodle_exception('nopermissions', 'error', '', get_string('viewfinancial', 'local_financial'));
+        redirect(new moodle_url('/local/dashboard/index.php', ['change' => 1]));
     }
-    if (!\local_financial\financial::user_has_access($directionid, $USER->id)) {
-        throw new \moodle_exception('nopermissions', 'error', '', get_string('viewfinancial', 'local_financial'));
-    }
+
+    $financial = \local_financial\financial::get_for_direction($directionid);
 }
 
 echo $OUTPUT->header();
-
-if (!$directionid) {
-    echo $OUTPUT->notification(get_string('norecruitmentselected', 'local_financial'), 'info');
-    echo $OUTPUT->footer();
-    die();
-}
-
-$financial = \local_financial\financial::get_for_direction($directionid);
 
 if (!$financial) {
     echo $OUTPUT->notification(get_string('nofinancial', 'local_financial'), 'info');
@@ -72,5 +79,21 @@ $message = file_rewrite_pluginfile_urls(
     $financial->id
 );
 echo format_text($message, $financial->messageformat, ['context' => $context]);
+
+// Display attachments.
+$attachments = \local_financial\financial::get_attachments($financial->id, $context);
+if (!empty($attachments)) {
+    echo $OUTPUT->heading(get_string('attachments', 'local_financial'), 4);
+    echo '<ul class="list-unstyled">';
+    foreach ($attachments as $file) {
+        $fileurl = moodle_url::make_pluginfile_url(
+            $context->id, 'local_financial', 'attachment', $financial->id,
+            $file->get_filepath(), $file->get_filename(), true
+        );
+        $icon = $OUTPUT->pix_icon(file_file_icon($file), $file->get_filename());
+        echo '<li>' . $icon . ' ' . html_writer::link($fileurl, $file->get_filename()) . '</li>';
+    }
+    echo '</ul>';
+}
 
 echo $OUTPUT->footer();

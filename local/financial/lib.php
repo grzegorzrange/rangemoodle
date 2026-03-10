@@ -34,12 +34,13 @@ function local_financial_pluginfile($course, $cm, $context, $filearea, $args, $f
 
     require_login();
 
-    if ($filearea === 'financial') {
+    if ($filearea === 'financial' || $filearea === 'attachment') {
         $itemid = array_shift($args);
         $filename = array_pop($args);
         $filepath = $args ? '/' . implode('/', $args) . '/' : '/';
 
         $fs = get_file_storage();
+        $forcedownload = ($filearea === 'attachment') ? true : $forcedownload;
         $file = $fs->get_file($context->id, 'local_financial', $filearea, $itemid, $filepath, $filename);
 
         if (!$file || $file->is_directory()) {

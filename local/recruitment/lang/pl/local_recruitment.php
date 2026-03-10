@@ -84,19 +84,19 @@ $string['notificationstatus'] = 'Powiadomienie';
 $string['notifiedyes'] = 'Wysłano';
 $string['notifiedno'] = 'Nie wysłano';
 $string['examregistrationsubject'] = 'Zapis na egzamin jest już dostępny';
-$string['examregistrationbody'] = 'Dzień dobry, Utworzono kurs {$a->direction} (rekrutacja: {$a->recruitment}). Zaloguj się do platformy: {$a->loginurl}';
-$string['examregistrationsms'] = 'Utworzono kurs {$a->direction} ({$a->recruitment}). Zaloguj sie do platformy.';
+$string['examregistrationbody'] = 'Dzień dobry,<br> zapis na egzamin dla kursu {$a->direction} (rekrutacja: {$a->recruitment}) jest już dostępny.<br><br> Zaloguj się do platformy: {$a->loginurl}';
+$string['examregistrationsms'] = 'Zapis na egzamin dla {$a->direction} ({$a->recruitment}) jest juz dostepny. Zaloguj sie do platformy.';
 $string['messageprovider:exam_registration'] = 'Powiadomienie o zapisie na egzamin';
 $string['newaccountsubject'] = 'Twoje konto na platformie zostało utworzone';
-$string['newaccountbody'] = 'Dzień dobry {$a->firstname} {$a->lastname},
-
-Twoje konto na platformie zostało utworzone.
-
-Login (PESEL): {$a->username}
-Hasło: {$a->password}
-
-Zaloguj się do platformy: {$a->loginurl}
-
+$string['newaccountbody'] = 'Dzień dobry {$a->firstname} {$a->lastname},<br>
+<br>
+Twoje konto na platformie zostało utworzone.<br>
+<br>
+Login (PESEL): {$a->username}<br>
+Hasło: {$a->password}<br>
+<br>
+Zaloguj się do platformy: {$a->loginurl}<br>
+<br>
 Zalecamy zmianę hasła po pierwszym logowaniu.';
 $string['archives_overview'] = 'Archiwum wykładów';
 $string['preparation_overview'] = 'Przygotowanie do egzaminu';

@@ -67,8 +67,15 @@ class send_declaration_notification extends \core\task\adhoc_task {
         }
 
         $now = time();
-        $noreplyuser = \core_user::get_noreply_user();
 
+        // Mark as notified FIRST to prevent duplicate sends on task retry.
+        $DB->update_record('local_recruitment_user', (object)[
+            'id' => $record->id,
+            'notified' => 1,
+            'timenotified' => $now,
+        ]);
+
+        $noreplyuser = \core_user::get_noreply_user();
         $loginurl = (new \moodle_url('/login/index.php'))->out(false);
 
         $subject = get_string('examregistrationsubject', 'local_recruitment');
@@ -103,26 +110,27 @@ class send_declaration_notification extends \core\task\adhoc_task {
         }
 
         // Send SMS.
-        if (class_exists('\local_support\sms_service') && !empty($user->phone1)) {
-            $smstext = get_string('examregistrationsms', 'local_recruitment', (object)[
-                'direction' => $direction->name,
-                'recruitment' => $recruitment->name,
-            ]);
-            \local_support\sms_service::send(
-                $user, $smstext, 'local_recruitment', 'exam_registration_sms', (int)$direction->id
-            );
+        try {
+            if (class_exists('\local_support\sms_service') && !empty($user->phone1)) {
+                $smstext = get_string('examregistrationsms', 'local_recruitment', (object)[
+                    'direction' => $direction->name,
+                    'recruitment' => $recruitment->name,
+                ]);
+                \local_support\sms_service::send(
+                    $user, $smstext, 'local_recruitment', 'exam_registration_sms', (int)$direction->id
+                );
+            }
+        } catch (\Exception $e) {
+            mtrace('Failed to send SMS to user ' . $user->id . ': ' . $e->getMessage());
         }
-
-        // Mark as notified.
-        $DB->update_record('local_recruitment_user', (object)[
-            'id' => $record->id,
-            'notified' => 1,
-            'timenotified' => $now,
-        ]);
 
         // Send user data to WordPress.
         if (!empty($data->wp_sync) && class_exists('\local_support\wp_sync_service')) {
-            \local_support\wp_sync_service::send($user, 'declaration_set');
+            try {
+                \local_support\wp_sync_service::send($user, 'declaration_set');
+            } catch (\Exception $e) {
+                mtrace('Failed WP sync for user ' . $user->id . ': ' . $e->getMessage());
+            }
         }
     }
 }

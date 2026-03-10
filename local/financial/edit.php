@@ -53,6 +53,12 @@ if ($id) {
         $record, 'message', $editoroptions, $context,
         'local_financial', 'financial', $record->id
     );
+    $draftitemid = file_get_submitted_draft_itemid('attachments');
+    file_prepare_draft_area(
+        $draftitemid, $context->id, 'local_financial', 'attachment', $record->id,
+        \local_financial\financial::filemanager_options()
+    );
+    $record->attachments = $draftitemid;
 }
 
 $form = new \local_financial\form\financial_form($pageurl, ['context' => $context, 'editid' => $id]);

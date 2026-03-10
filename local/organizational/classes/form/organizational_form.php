@@ -81,6 +81,15 @@ class organizational_form extends \moodleform {
         $mform->setType('directionid', PARAM_INT);
         $mform->addRule('directionid', get_string('required'), 'required', null, 'client');
 
+        // Attachments filemanager.
+        $mform->addElement(
+            'filemanager',
+            'attachments',
+            get_string('attachments', 'local_organizational'),
+            null,
+            organizational::filemanager_options()
+        );
+
         // Send notification checkbox.
         $mform->addElement('advcheckbox', 'sendnotification', get_string('sendnotification', 'local_organizational'));
         $mform->setDefault('sendnotification', 0);

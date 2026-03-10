@@ -56,3 +56,4 @@ $string['eventorganizationalcreated'] = 'Organizational matter created';
 $string['eventorganizationalupdated'] = 'Organizational matter updated';
 $string['eventorganizationaldeleted'] = 'Organizational matter deleted';
 $string['privacy:metadata'] = 'The organizational matters plugin does not store personal data directly.';
+$string['attachments'] = 'Attachments';

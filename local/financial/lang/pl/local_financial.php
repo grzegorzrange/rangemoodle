@@ -56,3 +56,4 @@ $string['eventfinancialcreated'] = 'Sprawa finansowa utworzona';
 $string['eventfinancialupdated'] = 'Sprawa finansowa zaktualizowana';
 $string['eventfinancialdeleted'] = 'Sprawa finansowa usunięta';
 $string['privacy:metadata'] = 'Wtyczka spraw finansowych nie przechowuje danych osobowych bezpośrednio.';
+$string['attachments'] = 'Załączniki';

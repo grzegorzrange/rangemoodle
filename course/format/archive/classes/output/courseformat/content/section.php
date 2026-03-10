@@ -40,6 +40,40 @@ class section extends section_base {
     /** @var course_format the course format */
     protected $format;
 
+    /**
+     * Sections are collapsed by default in archive format.
+     * If the user has explicitly expanded a section, respect that preference.
+     *
+     * @return bool
+     */
+    protected function is_section_collapsed(): bool {
+        global $PAGE;
+
+        // Section 0 (general) is always expanded.
+        if ($this->section->section == 0) {
+            return false;
+        }
+
+        // If user explicitly expanded via URL parameter, show expanded.
+        $expandsection = $PAGE->url->get_param('expandsection');
+        if ($expandsection !== null && $this->section->section == $expandsection) {
+            return false;
+        }
+
+        // Check user preferences — if user explicitly expanded, respect it.
+        $preferences = $this->format->get_sections_preferences();
+        if (isset($preferences[$this->section->id])) {
+            $sectionpreferences = $preferences[$this->section->id];
+            // If contentcollapsed is explicitly set to false, the user expanded it.
+            if (isset($sectionpreferences->contentcollapsed) && empty($sectionpreferences->contentcollapsed)) {
+                return false;
+            }
+        }
+
+        // Default: collapsed.
+        return true;
+    }
+
     public function export_for_template(\renderer_base $output): stdClass {
         $format = $this->format;
 

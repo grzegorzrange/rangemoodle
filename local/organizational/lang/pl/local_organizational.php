@@ -56,3 +56,4 @@ $string['eventorganizationalcreated'] = 'Sprawa organizacyjna utworzona';
 $string['eventorganizationalupdated'] = 'Sprawa organizacyjna zaktualizowana';
 $string['eventorganizationaldeleted'] = 'Sprawa organizacyjna usunięta';
 $string['privacy:metadata'] = 'Wtyczka spraw organizacyjnych nie przechowuje danych osobowych bezpośrednio.';
+$string['attachments'] = 'Załączniki';

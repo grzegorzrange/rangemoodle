@@ -26,34 +26,41 @@ require_once(__DIR__ . '/../../config.php');
 
 require_login();
 
+$id = optional_param('id', 0, PARAM_INT);
+
 $context = context_system::instance();
 $PAGE->set_context($context);
-$PAGE->set_url(new moodle_url('/local/organizational/view.php'));
+$PAGE->set_url(new moodle_url('/local/organizational/view.php', $id ? ['id' => $id] : []));
 $PAGE->set_pagelayout('standard');
 $PAGE->set_title(get_string('organizationalmatters', 'local_organizational'));
 $PAGE->set_heading(get_string('organizationalmatters', 'local_organizational'));
 
 $isadmin = is_siteadmin();
-$directionid = !empty($SESSION->active_direction_id) ? (int)$SESSION->active_direction_id : 0;
 
-if (!$isadmin) {
+if ($id && $isadmin) {
+    // Admin viewing a specific record by ID.
+    $organizational = $DB->get_record('local_organizational', ['id' => $id], '*', MUST_EXIST);
+} else {
+    // Regular user or admin without ID — use session direction.
+    $directionid = !empty($SESSION->active_direction_id) ? (int)$SESSION->active_direction_id : 0;
+
+    if (!$isadmin) {
+        if (!$directionid) {
+            throw new \moodle_exception('nopermissions', 'error', '', get_string('vieworganizational', 'local_organizational'));
+        }
+        if (!\local_organizational\organizational::user_has_access($directionid, $USER->id)) {
+            throw new \moodle_exception('nopermissions', 'error', '', get_string('vieworganizational', 'local_organizational'));
+        }
+    }
+
     if (!$directionid) {
-        throw new \moodle_exception('nopermissions', 'error', '', get_string('vieworganizational', 'local_organizational'));
+        redirect(new moodle_url('/local/dashboard/index.php', ['change' => 1]));
     }
-    if (!\local_organizational\organizational::user_has_access($directionid, $USER->id)) {
-        throw new \moodle_exception('nopermissions', 'error', '', get_string('vieworganizational', 'local_organizational'));
-    }
+
+    $organizational = \local_organizational\organizational::get_for_direction($directionid);
 }
 
 echo $OUTPUT->header();
-
-if (!$directionid) {
-    echo $OUTPUT->notification(get_string('norecruitmentselected', 'local_organizational'), 'info');
-    echo $OUTPUT->footer();
-    die();
-}
-
-$organizational = \local_organizational\organizational::get_for_direction($directionid);
 
 if (!$organizational) {
     echo $OUTPUT->notification(get_string('noorganizational', 'local_organizational'), 'info');
@@ -72,5 +79,21 @@ $message = file_rewrite_pluginfile_urls(
     $organizational->id
 );
 echo format_text($message, $organizational->messageformat, ['context' => $context]);
+
+// Display attachments.
+$attachments = \local_organizational\organizational::get_attachments($organizational->id, $context);
+if (!empty($attachments)) {
+    echo $OUTPUT->heading(get_string('attachments', 'local_organizational'), 4);
+    echo '<ul class="list-unstyled">';
+    foreach ($attachments as $file) {
+        $fileurl = moodle_url::make_pluginfile_url(
+            $context->id, 'local_organizational', 'attachment', $organizational->id,
+            $file->get_filepath(), $file->get_filename(), true
+        );
+        $icon = $OUTPUT->pix_icon(file_file_icon($file), $file->get_filename());
+        echo '<li>' . $icon . ' ' . html_writer::link($fileurl, $file->get_filename()) . '</li>';
+    }
+    echo '</ul>';
+}
 
 echo $OUTPUT->footer();

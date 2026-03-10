@@ -87,6 +87,17 @@ $string['examregistrationsubject'] = 'Exam registration is now available';
 $string['examregistrationbody'] = 'Hello, exam registration for the course {$a->direction} (recruitment: {$a->recruitment}) is now available. Please log in to the platform: {$a->loginurl}';
 $string['examregistrationsms'] = 'Exam registration for {$a->direction} ({$a->recruitment}) is now available. Log in to the platform.';
 $string['messageprovider:exam_registration'] = 'Exam registration notification';
+$string['newaccountsubject'] = 'Your account has been created';
+$string['newaccountbody'] = 'Hello {$a->firstname} {$a->lastname},
+
+Your account on the platform has been created.
+
+Login (PESEL): {$a->username}
+Password: {$a->password}
+
+Log in to the platform: {$a->loginurl}
+
+We recommend changing your password after first login.';
 $string['archives_overview'] = 'Lecture Archives';
 $string['preparation_overview'] = 'Exam Preparation';
 $string['internaltests_overview'] = 'Internal Tests';

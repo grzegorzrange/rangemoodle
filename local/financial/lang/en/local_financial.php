@@ -56,3 +56,4 @@ $string['eventfinancialcreated'] = 'Financial matter created';
 $string['eventfinancialupdated'] = 'Financial matter updated';
 $string['eventfinancialdeleted'] = 'Financial matter deleted';
 $string['privacy:metadata'] = 'The financial matters plugin does not store personal data directly.';
+$string['attachments'] = 'Attachments';

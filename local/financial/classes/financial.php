@@ -71,6 +71,18 @@ class financial {
         );
         $DB->update_record(self::TABLE, $record);
 
+        // Save attachments.
+        if (isset($data->attachments)) {
+            file_save_draft_area_files(
+                $data->attachments,
+                $context->id,
+                'local_financial',
+                'attachment',
+                $id,
+                self::filemanager_options()
+            );
+        }
+
         return $id;
     }
 
@@ -102,6 +114,18 @@ class financial {
         );
 
         $DB->update_record(self::TABLE, $record);
+
+        // Save attachments.
+        if (isset($data->attachments)) {
+            file_save_draft_area_files(
+                $data->attachments,
+                $context->id,
+                'local_financial',
+                'attachment',
+                $record->id,
+                self::filemanager_options()
+            );
+        }
     }
 
     /**
@@ -115,6 +139,7 @@ class financial {
 
         $fs = get_file_storage();
         $fs->delete_area_files($context->id, 'local_financial', 'financial', $id);
+        $fs->delete_area_files($context->id, 'local_financial', 'attachment', $id);
 
         $DB->delete_records(self::NOTIFY_TABLE, ['financialid' => $id]);
         $DB->delete_records(self::TABLE, ['id' => $id]);
@@ -218,5 +243,31 @@ class financial {
             'context' => $context,
             'noclean' => true,
         ];
+    }
+
+    /**
+     * Filemanager options for attachments.
+     *
+     * @return array
+     */
+    public static function filemanager_options(): array {
+        return [
+            'maxfiles' => 20,
+            'maxbytes' => 0,
+            'subdirs' => 0,
+        ];
+    }
+
+    /**
+     * Get attachment files for a financial matter.
+     *
+     * @param int $id Financial matter ID.
+     * @param \context $context
+     * @return \stored_file[]
+     */
+    public static function get_attachments(int $id, \context $context): array {
+        $fs = get_file_storage();
+        $files = $fs->get_area_files($context->id, 'local_financial', 'attachment', $id, 'filename', false);
+        return $files;
     }
 }

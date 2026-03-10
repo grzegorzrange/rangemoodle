@@ -516,6 +516,9 @@ class recruitment {
                     $user = $DB->get_record('user', ['id' => $newuser->id]);
                     $result['created']++;
 
+                    // Force password change on first login.
+                    set_user_preference('auth_forcepasswordchange', 1, $user->id);
+
                     // Send credentials email to new user.
                     if (!empty($user->email)) {
                         self::send_new_account_email($user, $plainpassword);

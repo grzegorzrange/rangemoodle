@@ -26,35 +26,41 @@ require_once(__DIR__ . '/../../config.php');
 
 require_login();
 
+$id = optional_param('id', 0, PARAM_INT);
+
 $context = context_system::instance();
 $PAGE->set_context($context);
-$PAGE->set_url(new moodle_url('/local/schedule/view.php'));
+$PAGE->set_url(new moodle_url('/local/schedule/view.php', $id ? ['id' => $id] : []));
 $PAGE->set_pagelayout('standard');
 $PAGE->set_title(get_string('schedule', 'local_schedule'));
 $PAGE->set_heading(get_string('schedule', 'local_schedule'));
 
 $isadmin = is_siteadmin();
-$directionid = !empty($SESSION->active_direction_id) ? (int)$SESSION->active_direction_id : 0;
 
-// Access check: admin always has access; regular users need cohort membership.
-if (!$isadmin) {
+if ($id && $isadmin) {
+    // Admin viewing a specific record by ID.
+    $schedule = $DB->get_record('local_schedule', ['id' => $id], '*', MUST_EXIST);
+} else {
+    // Regular user or admin without ID — use session direction.
+    $directionid = !empty($SESSION->active_direction_id) ? (int)$SESSION->active_direction_id : 0;
+
+    if (!$isadmin) {
+        if (!$directionid) {
+            throw new \moodle_exception('nopermissions', 'error', '', get_string('viewschedule', 'local_schedule'));
+        }
+        if (!\local_schedule\schedule::user_has_access($directionid, $USER->id)) {
+            throw new \moodle_exception('nopermissions', 'error', '', get_string('viewschedule', 'local_schedule'));
+        }
+    }
+
     if (!$directionid) {
-        throw new \moodle_exception('nopermissions', 'error', '', get_string('viewschedule', 'local_schedule'));
+        redirect(new moodle_url('/local/dashboard/index.php', ['change' => 1]));
     }
-    if (!\local_schedule\schedule::user_has_access($directionid, $USER->id)) {
-        throw new \moodle_exception('nopermissions', 'error', '', get_string('viewschedule', 'local_schedule'));
-    }
+
+    $schedule = \local_schedule\schedule::get_for_direction($directionid);
 }
 
 echo $OUTPUT->header();
-
-if (!$directionid) {
-    echo $OUTPUT->notification(get_string('norecruitmentselected', 'local_schedule'), 'info');
-    echo $OUTPUT->footer();
-    die();
-}
-
-$schedule = \local_schedule\schedule::get_for_direction($directionid);
 
 if (!$schedule) {
     echo $OUTPUT->notification(get_string('noschedule', 'local_schedule'), 'info');

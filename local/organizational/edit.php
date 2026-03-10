@@ -53,6 +53,12 @@ if ($id) {
         $record, 'message', $editoroptions, $context,
         'local_organizational', 'organizational', $record->id
     );
+    $draftitemid = file_get_submitted_draft_itemid('attachments');
+    file_prepare_draft_area(
+        $draftitemid, $context->id, 'local_organizational', 'attachment', $record->id,
+        \local_organizational\organizational::filemanager_options()
+    );
+    $record->attachments = $draftitemid;
 }
 
 $form = new \local_organizational\form\organizational_form($pageurl, ['context' => $context, 'editid' => $id]);

@@ -404,6 +404,14 @@ div[data-region="footer-container-popover"]{
   }
 }
 
+// Larger action icons on mobile for easier tapping.
+@media (max-width: 768px) {
+  .generaltable td a .icon,
+  .generaltable td a i.fa {
+    font-size: 22px;
+  }
+}
+
 // Responsive horizontal scroll for tables on small devices.
 @media (max-width: 768px) {
   .flexible-wrap,
