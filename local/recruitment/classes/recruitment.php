@@ -499,6 +499,7 @@ class recruitment {
 
             if (!$user) {
                 // Create new user.
+                $plainpassword = generate_password(12);
                 $newuser = new \stdClass();
                 $newuser->username = $username;
                 $newuser->firstname = $firstname;
@@ -508,12 +509,17 @@ class recruitment {
                 $newuser->auth = 'manual';
                 $newuser->confirmed = 1;
                 $newuser->mnethostid = $CFG->mnet_localhost_id;
-                $newuser->password = generate_password(12);
+                $newuser->password = $plainpassword;
 
                 try {
                     $newuser->id = user_create_user($newuser, true, false);
                     $user = $DB->get_record('user', ['id' => $newuser->id]);
                     $result['created']++;
+
+                    // Send credentials email to new user.
+                    if (!empty($user->email)) {
+                        self::send_new_account_email($user, $plainpassword);
+                    }
                 } catch (\Exception $e) {
                     $a = new \stdClass();
                     $a->line = $csvline;
@@ -681,5 +687,50 @@ class recruitment {
         $idnumber = preg_replace('/[^a-zA-Z0-9_]/', '', $idnumber);
         $idnumber = preg_replace('/_+/', '_', $idnumber);
         return trim($idnumber, '_');
+    }
+
+    /**
+     * Send email with account credentials to a newly created user.
+     *
+     * @param \stdClass $user The user record.
+     * @param string $plainpassword The plain text password.
+     */
+    private static function send_new_account_email(\stdClass $user, string $plainpassword): void {
+        $loginurl = (new \moodle_url('/login/index.php'))->out(false);
+
+        $a = (object)[
+            'firstname' => $user->firstname,
+            'lastname' => $user->lastname,
+            'username' => $user->username,
+            'password' => $plainpassword,
+            'loginurl' => $loginurl,
+        ];
+
+        $subject = get_string('newaccountsubject', 'local_recruitment');
+        $messagetext = get_string('newaccountbody', 'local_recruitment', $a);
+
+        $ahtml = clone $a;
+        $ahtml->loginurl = '<a href="' . s($loginurl) . '">' . s($loginurl) . '</a>';
+        $messagehtml = nl2br(get_string('newaccountbody', 'local_recruitment', $ahtml));
+
+        $noreplyuser = \core_user::get_noreply_user();
+
+        $message = new \core\message\message();
+        $message->component = 'local_recruitment';
+        $message->name = 'exam_registration';
+        $message->userfrom = $noreplyuser;
+        $message->userto = $user;
+        $message->subject = $subject;
+        $message->fullmessage = $messagetext;
+        $message->fullmessageformat = FORMAT_PLAIN;
+        $message->fullmessagehtml = $messagehtml;
+        $message->smallmessage = $subject;
+        $message->notification = 1;
+
+        try {
+            message_send($message);
+        } catch (\Exception $e) {
+            mtrace('Failed to send new account email to user ' . $user->id . ': ' . $e->getMessage());
+        }
     }
 }

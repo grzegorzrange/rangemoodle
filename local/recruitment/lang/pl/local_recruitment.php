@@ -87,6 +87,17 @@ $string['examregistrationsubject'] = 'Zapis na egzamin jest już dostępny';
 $string['examregistrationbody'] = 'Dzień dobry, Utworzono kurs {$a->direction} (rekrutacja: {$a->recruitment}). Zaloguj się do platformy: {$a->loginurl}';
 $string['examregistrationsms'] = 'Utworzono kurs {$a->direction} ({$a->recruitment}). Zaloguj sie do platformy.';
 $string['messageprovider:exam_registration'] = 'Powiadomienie o zapisie na egzamin';
+$string['newaccountsubject'] = 'Twoje konto na platformie zostało utworzone';
+$string['newaccountbody'] = 'Dzień dobry {$a->firstname} {$a->lastname},
+
+Twoje konto na platformie zostało utworzone.
+
+Login (PESEL): {$a->username}
+Hasło: {$a->password}
+
+Zaloguj się do platformy: {$a->loginurl}
+
+Zalecamy zmianę hasła po pierwszym logowaniu.';
 $string['archives_overview'] = 'Archiwum wykładów';
 $string['preparation_overview'] = 'Przygotowanie do egzaminu';
 $string['internaltests_overview'] = 'Testy wewnętrzne';
