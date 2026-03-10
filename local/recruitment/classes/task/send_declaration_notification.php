@@ -69,10 +69,13 @@ class send_declaration_notification extends \core\task\adhoc_task {
         $now = time();
         $noreplyuser = \core_user::get_noreply_user();
 
+        $loginurl = (new \moodle_url('/login/index.php'))->out(false);
+
         $subject = get_string('examregistrationsubject', 'local_recruitment');
         $messagetext = get_string('examregistrationbody', 'local_recruitment', (object)[
             'direction' => $direction->name,
             'recruitment' => $recruitment->name,
+            'loginurl' => $loginurl,
         ]);
 
         // Send Moodle message (email).
@@ -84,7 +87,12 @@ class send_declaration_notification extends \core\task\adhoc_task {
         $message->subject = $subject;
         $message->fullmessage = $messagetext;
         $message->fullmessageformat = FORMAT_PLAIN;
-        $message->fullmessagehtml = nl2br(s($messagetext));
+        $messagehtmltext = get_string('examregistrationbody', 'local_recruitment', (object)[
+            'direction' => $direction->name,
+            'recruitment' => $recruitment->name,
+            'loginurl' => '<a href="' . s($loginurl) . '">' . s($loginurl) . '</a>',
+        ]);
+        $message->fullmessagehtml = nl2br($messagehtmltext);
         $message->smallmessage = $subject;
         $message->notification = 1;
 
