@@ -49,11 +49,6 @@ class section extends section_base {
     protected function is_section_collapsed(): bool {
         global $PAGE;
 
-        // Section 0 (general) is always expanded.
-        if ($this->section->section == 0) {
-            return false;
-        }
-
         // If user explicitly expanded via URL parameter, show expanded.
         $expandsection = $PAGE->url->get_param('expandsection');
         if ($expandsection !== null && $this->section->section == $expandsection) {
