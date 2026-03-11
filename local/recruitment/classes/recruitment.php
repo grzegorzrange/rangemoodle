@@ -514,7 +514,6 @@ class recruitment {
                 try {
                     $newuser->id = user_create_user($newuser, true, false);
                     $user = $DB->get_record('user', ['id' => $newuser->id]);
-                    $result['created']++;
 
                     // Force password change on first login.
                     set_user_preference('auth_forcepasswordchange', 1, $user->id);
