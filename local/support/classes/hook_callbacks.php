@@ -43,6 +43,9 @@ class hook_callbacks {
     public static function check_file_override(\core\hook\after_config $hook): void {
         global $CFG, $DB, $PAGE, $OUTPUT, $USER, $SESSION, $COURSE, $SITE, $FULLME, $ME, $SCRIPT;
 
+        // Disable mobile app download link in email footers.
+        $CFG->enablemobilewebservice = false;
+
         // Add body class for non-admin users to hide editing UI.
         if (!empty($PAGE) && isloggedin() && !is_siteadmin()) {
             $PAGE->add_body_class('not-admin');
