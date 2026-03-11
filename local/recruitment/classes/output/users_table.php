@@ -81,7 +81,7 @@ class users_table extends \table_sql {
              u.username, u.firstname, u.lastname, u.email, u.phone1',
             '{local_recruitment_user} ru
              JOIN {user} u ON u.id = ru.userid',
-            'ru.directionid = :directionid',
+            'ru.directionid = :directionid AND u.deleted = 0 AND u.suspended = 0',
             ['directionid' => $directionid]
         );
     }
