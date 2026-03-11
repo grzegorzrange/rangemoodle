@@ -398,11 +398,14 @@ div[data-region="footer-container-popover"]{
 }
 }
 
-// Hide edit mode toggle for non-admin users.
+// Hide edit mode toggle and its divider for non-admin users.
 body.not-admin {
   .editmode-switch-form,
   input[name="setmode"],
-  .btn[data-action="editmode"] {
+  .btn[data-action="editmode"],
+  .editmode-switch-form + .divider,
+  .divider:has(+ .editmode-switch-form),
+  .editmode-switch-form ~ .divider {
     display: none !important;
   }
 }
