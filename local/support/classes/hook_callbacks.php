@@ -43,6 +43,11 @@ class hook_callbacks {
     public static function check_file_override(\core\hook\after_config $hook): void {
         global $CFG, $DB, $PAGE, $OUTPUT, $USER, $SESSION, $COURSE, $SITE, $FULLME, $ME, $SCRIPT;
 
+        // Add body class for non-admin users to hide editing UI.
+        if (!empty($PAGE) && isloggedin() && !is_siteadmin()) {
+            $PAGE->add_body_class('not-admin');
+        }
+
         if (empty($_SERVER['SCRIPT_FILENAME'])) {
             return;
         }
@@ -105,11 +110,6 @@ class hook_callbacks {
         if (strpos($pagetype, 'course-view-') === 0 && isloggedin() && !isguestuser()) {
             require_once($CFG->dirroot . '/local/support/lib.php');
             \local_support_inject_internaltest_badges();
-        }
-
-        // Add body class for non-admin users to hide editing UI.
-        if (isloggedin() && !is_siteadmin()) {
-            $PAGE->add_body_class('not-admin');
         }
 
         $hook->add_html(
