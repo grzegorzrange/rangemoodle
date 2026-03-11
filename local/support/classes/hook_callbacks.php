@@ -107,6 +107,11 @@ class hook_callbacks {
             \local_support_inject_internaltest_badges();
         }
 
+        // Add body class for non-admin users to hide editing UI.
+        if (isloggedin() && !is_siteadmin()) {
+            $PAGE->add_body_class('not-admin');
+        }
+
         $hook->add_html(
             '<link rel="preconnect" href="https://fonts.googleapis.com">' .
             '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>' .
