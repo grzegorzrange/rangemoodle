@@ -550,8 +550,8 @@ class recruitment {
                 $DB->update_record('local_recruitment_user', $existing);
                 $result['updated']++;
 
-                // Only notify if not yet notified for this direction.
-                if (empty($existing->notified)) {
+                // Only notify if declaration is set and not yet notified for this direction.
+                if ($declaration && empty($existing->notified)) {
                     $userstonotify[] = ['user' => $user, 'recordid' => $existing->id, 'declaration' => $declaration];
                 }
             } else {
@@ -568,7 +568,10 @@ class recruitment {
                 $recordid = $DB->insert_record('local_recruitment_user', $record);
                 $result['created']++;
 
-                $userstonotify[] = ['user' => $user, 'recordid' => $recordid, 'declaration' => $declaration];
+                // Only notify if declaration is set.
+                if ($declaration) {
+                    $userstonotify[] = ['user' => $user, 'recordid' => $recordid, 'declaration' => $declaration];
+                }
             }
 
             // Send user data to WordPress immediately if declaration is set.
